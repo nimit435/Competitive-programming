@@ -1,0 +1,4 @@
+*.py
+*.bin
+__pycache__/
+.cph/
