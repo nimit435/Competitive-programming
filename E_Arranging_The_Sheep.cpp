@@ -5,14 +5,14 @@
 #include <unordered_set>
 #include <vector>
 #include <algorithm>
-#include<limits.h>
+#include <limits.h>
 #include <string>
 #include <map>
 #include <queue>
 #include <deque>
 #include <stack>
 #include <cmath>
-// #include <bits/stdc++.h>
+#include <cstring>
 
 using namespace std;
 
@@ -20,6 +20,7 @@ using namespace std;
 #define Code ios_base::sync_with_stdio(false);
 #define By cin.tie(NULL);
 #define Solve cout.tie(NULL);
+#define endel '\n';
 
 //Aliases
 using ll = long long;
@@ -34,6 +35,8 @@ const ll mod = 1e9 + 7;
 //TypeDEf
 typedef pair<ll, ll> pll;
 typedef vector<ll> vll;
+typedef vector<vector<ll> > vvll;
+typedef vector<vector<pll> > vvpll;
 typedef vector<pll> vpll;
 typedef vector<string> vs;
 typedef unordered_map<ll, ll> umll;
@@ -46,6 +49,7 @@ typedef map<ll, ll> mll;
 #define mp make_pair
 #define fl(i, n) for(int i = 0; i < n; i++)
 #define rl(i, m, n) for(int i = n; i >= m; i--)
+#define frl(i,j,n) for(int i=j; i<n; i++)
 #define py cout << "YES\n";
 #define pm cout << "-1\n";
 #define pn cout << "NO\n";
@@ -94,63 +98,80 @@ string decToBinary(int n) { string s = ""; int i = 0; while (n > 0) { s = to_str
 ll binaryToDecimal(string n) { string num = n; ll dec_value = 0; int base = 1; int len = num.length(); for (int i = len - 1; i >= 0; i--) { if (num[i] == '1') dec_value += base; base = base * 2; } return dec_value; }
 
 //Check
-bool isPrime(ll n) { if (n <= 1) return false; if (n <= 3) return true; if (n % 2 == 0 || n % 3 == 0) return false; for (int i = 5; i * i <= n; i = i + 6) if (n % i == 0 || n % (i + 2) == 0) return false; return true; }
+bool isPrime(ll n) { if (n <= 1) return false; if (n <= 3) return true; if (n % 2 == 0 || n % 33 == 0) return false; for (int i = 5; i * i <= n; i = i + 6) if (n % i == 0 || n % (i + 2) == 0) return false; return true; }
 bool isPowerOfTwo(int n) { if (n == 0) return false; return (ceil(log2(n)) == floor(log2(n))); }
 bool isPerfectSquare(ll x) { if (x >= 0) { ll sr = sqrt(x); return (sr * sr == x); } return false; }
+
+//Number of Inversions
+ll merge(vector<ll> &arr, ll low, ll mid, ll high) {vector<int> temp;ll left = low;ll right = mid + 1;ll cnt = 0;while (left <= mid && right <= high) {if (arr[left] <= arr[right]) {temp.push_back(arr[left]);left++;}else {temp.push_back(arr[right]);cnt += (mid - left + 1);right++;}}while (left <= mid) {temp.push_back(arr[left]);left++;}while (right <= high) {temp.push_back(arr[right]);right++;}for (int i = low; i <= high; i++) {arr[i] = temp[i - low];}return cnt;}
+ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) return cnt;int mid = (low + high) / 2;cnt += mergeSort(arr, low, mid);cnt += mergeSort(arr, mid + 1, high);cnt += merge(arr, low, mid, high);return cnt;}
+ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
 void solve() {
     ll n;
-    cin >> n;
-    vector<ll> vec(n);
-    fl(i,n){ 
-        cin>> vec[i];
-    }
-    ll a = vec[0];
-    ll b = 1e18;
-    ll res = 0;
-    for(int i=1; i<n; i++){
-        if(b == 1e18){
-            if(vec[i]<=a){
-                a = vec[i];
-            }
-            else{
-                b = vec[i];
-            }
-        }
-        else{
-            ll x = min(a, b);
-            ll y = max(a, b);
-            if(vec[i]<=x){
-                if(a<b){
-                    a= vec[i];
-                }
-                else{
-                    b = vec[i];
-                }
-            }
-            else if(vec[i]>y){
-                if(a<b){
-                    a= vec[i];
-                }
-                else{
-                    b = vec[i];
-                }
-                res++;
-            }
-            else{
-                if(a<b){
-                    b = vec[i];
-                }
-                else{
-                    a = vec[i];
-                }
-            }
+    cin>>n;
+    string s;
+    cin>>s;
+    int mn=n;
+    int mx= -1;
+    ll sh_cnt=0;
+    fl(i,n){
+        if(s[i]=='*'){
+            mn = min(mn, i);
+            mx= max(mx,i);
+            sh_cnt++;
         }
     }
-    cout<<res<<endl;
+    if(mx==-1){
+        cout<<0<<endl;
+        return;
+    }
+    else{
+        if(mx-mn+1 == sh_cnt){
+            cout<< 0<<endl;
+            return;
+        }
+        ll mx_cnt= 0;
+        ll mx_ind= -1;
+        ll temp_cnt =0;
+        for(int i=mn; i<=mx; i++){
+            if(s[i]=='*'){
+                temp_cnt++;
+            }
+            else{
+                if(temp_cnt>mx_cnt){
+                    mx_cnt= temp_cnt;
+                    mx_ind= i-1;
+                }
+                temp_cnt =0;
+
+            }
+        }
+        if(temp_cnt>mx_cnt){
+            mx_cnt= temp_cnt;
+            mx_ind= mx;
+        }
+        ll curr_cnt=0;
+        for(int i = mn; i< mx_ind-mx_cnt; i++){
+            if(s[i]=='*'){
+                curr_cnt++;
+            }
+        }
+        ll j = 0;
+        ll ans =0;
+        for(int i = mn; i< mx_ind-mx_cnt; i++){
+            if(s[i]=='*'){
+                ans+= (mx_ind-mx_cnt)-curr_cnt+j+1-i;
+                cout<<(mx_ind-mx_cnt)-curr_cnt+j+1-i<<" ";
+                j++;
+            }
+        }
+        cout<<ans<<endl;
+    }
 }
-//Main
+// Allah hu Akbar
+// 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
     ll t;
