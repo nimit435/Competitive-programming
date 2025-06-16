@@ -116,50 +116,59 @@ void solve() {
     int mn=n;
     int mx= -1;
     ll sh_cnt=0;
-    vll sh_ind;
     fl(i,n){
         if(s[i]=='*'){
-            mx = max(mx, i);
             mn = min(mn, i);
+            mx= max(mx,i);
             sh_cnt++;
-            sh_ind.pb(i);
         }
     }
     if(mx==-1){
         cout<<0<<endl;
         return;
     }
-    else if(mx-mn+1==sh_cnt){
-        cout<<0<<endl;
-        return;
-    }
-
     else{
-        ll res=0;
-        ll mid_bakri = sh_ind[(sh_cnt-1)/2];
-        
-        int i= mid_bakri-1;
-        int j = mid_bakri-1;
-        while(i>=0){
-            if(s[i]=='*'){
-                res+= j-i;
-                j--;
-            }
-            i--;
+        if(mx-mn+1 == sh_cnt){
+            cout<< 0<<endl;
+            return;
         }
-        i = mid_bakri+1;
-        j = mid_bakri+1;
-        while(i<n){
+        ll mx_cnt= 0;
+        ll mx_ind= -1;
+        ll temp_cnt =0;
+        for(int i=mn; i<=mx; i++){
             if(s[i]=='*'){
-                res += i-j;
+                temp_cnt++;
+            }
+            else{
+                if(temp_cnt>mx_cnt){
+                    mx_cnt= temp_cnt;
+                    mx_ind= i-1;
+                }
+                temp_cnt =0;
+
+            }
+        }
+        if(temp_cnt>mx_cnt){
+            mx_cnt= temp_cnt;
+            mx_ind= mx;
+        }
+        ll curr_cnt=0;
+        for(int i = mn; i< mx_ind-mx_cnt; i++){
+            if(s[i]=='*'){
+                curr_cnt++;
+            }
+        }
+        ll j = 0;
+        ll ans =0;
+        for(int i = mn; i< mx_ind-mx_cnt; i++){
+            if(s[i]=='*'){
+                ans+= (mx_ind-mx_cnt)-curr_cnt+j+1-i;
+                cout<<(mx_ind-mx_cnt)-curr_cnt+j+1-i<<" ";
                 j++;
             }
-            i++;
         }
-        cout<<res<<endl;
-        return;
+        cout<<ans<<endl;
     }
-    
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
