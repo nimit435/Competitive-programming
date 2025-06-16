@@ -108,58 +108,38 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
+ll func(ll i , vll& vec, vll& dp){
+
+    if(i>=vec.size()){
+        return 0;
+    }
+    if(dp[i]!=-1){
+        return dp[i];
+    }
+    
+    else{
+        ll k = i+(vec[i]);
+        if(k>=vec.size()){
+            dp[i] = 1+func(i+1, vec, dp);
+        }
+        else{
+            dp[i] = min(func(k+1, vec, dp), 1+func(i+1, vec, dp));
+        }
+        return dp[i];
+    }
+}
 void solve() {
     ll n;
     cin>>n;
-    string s;
-    cin>>s;
-    int mn=n;
-    int mx= -1;
-    ll sh_cnt=0;
-    vll sh_ind;
+    vll vec(n);
     fl(i,n){
-        if(s[i]=='*'){
-            mx = max(mx, i);
-            mn = min(mn, i);
-            sh_cnt++;
-            sh_ind.pb(i);
-        }
+        cin>>vec[i];
     }
-    if(mx==-1){
-        cout<<0<<endl;
-        return;
-    }
-    else if(mx-mn+1==sh_cnt){
-        cout<<0<<endl;
-        return;
-    }
-
-    else{
-        ll res=0;
-        ll mid_bakri = sh_ind[(sh_cnt-1)/2];
-        
-        int i= mid_bakri-1;
-        int j = mid_bakri-1;
-        while(i>=0){
-            if(s[i]=='*'){
-                res+= j-i;
-                j--;
-            }
-            i--;
-        }
-        i = mid_bakri+1;
-        j = mid_bakri+1;
-        while(i<n){
-            if(s[i]=='*'){
-                res += i-j;
-                j++;
-            }
-            i++;
-        }
-        cout<<res<<endl;
-        return;
-    }
+    vll dp(n,-1);
     
+    ll res = func(0, vec, dp);
+    cout<<res<<endl;
+
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

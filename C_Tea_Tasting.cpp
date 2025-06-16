@@ -108,58 +108,158 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
+class Segtree{
+    private: 
+        ll size;
+        vll sums;
+    public:
+        Segtree(ll n){
+            size=1;
+            while(size<n){
+                size= size*2;
+            }
+            sums.assign(2*size, 0LL);
+        }
+        void add(ll l, ll r, ll v, ll x, ll lx, ll rx){
+            if(l>=rx || r<=lx){
+                return;
+            }
+            else if(lx>= l && rx<=r){
+                sums[x] += v;
+                return;
+            }
+            ll m= (lx+rx)/2;
+            add(l,r,v, 2*x+1, lx, m);
+            add(l, r,v, 2*x+2, m, rx);
+        }
+
+        void add(ll l,ll r , ll x){
+            add(l, r, x, 0, 0, size);
+        }
+
+        ll get(ll i, ll x, ll lx, ll rx ){
+            if(rx-lx==1){
+                return sums[x];
+            }
+            ll res;
+            ll m = (lx+rx)/2;
+            if(i<m){
+                res = get(i, 2*x+1, lx, m);
+            }
+            else{
+                res = get(i, 2*x+2, m, rx);
+            }
+            return res+sums[x];
+        }
+
+        ll get(ll i){
+            return get(i, 0 , 0, size);
+        }
+        void set(ll i, ll v, ll x, ll lx, ll rx){
+            if(rx-lx==1){
+                sums[x]=v;
+                return;
+            }
+            ll m= (lx+rx)/2;
+            if(i>=m){
+                set(i, v, 2*x+2, m, rx );
+            }
+            else{
+                set(i, v, 2*x+1, lx, m);
+            }
+            sums[x]= sums[2*x+1]+sums[2*x+2];
+        }
+        void set(ll i, ll v){
+            set(i, v, 0, 0, size);
+            // display();
+        }
+        ll sum(ll l, ll r, ll x, ll lx, ll rx){
+            if(l>=rx || r<=lx){
+                return 0;
+            }
+            else if(lx>= l && rx<=r){
+                return sums[x];
+            }
+            ll m= (lx+rx)/2;
+            ll s1= sum(l,r, 2*x+1, lx, m);
+            ll s2= sum(l, r, 2*x+2, m, rx);
+            return s1+s2;
+            
+        }
+ 
+        ll sum(ll l,ll r){
+            return sum(l, r, 0, 0, size);
+        }
+        void display(){
+            printvec(sums);
+        }
+ 
+};
+ll get_ind(ll i, vll& pref , vll& vec){
+    ll right = pref.size()-2; //pref[right]-pref[i-1]>vec[i]
+    ll left = i; //pref[left]-pref[i-1]<=vec[i]
+    if(pref[right+1]-pref[i]<= vec[i]){
+        return right;
+    }
+    if(pref[left+1]-pref[left]>vec[i]){
+        return -1;
+    }
+    while(right-left>1){
+        ll mid= left + (right-left)/2;
+        if(pref[mid+1]-pref[i]<=vec[i]){
+            left= mid;
+        }
+        else{
+            right = mid;
+        }
+    }
+    return left;
+}
 void solve() {
     ll n;
     cin>>n;
-    string s;
-    cin>>s;
-    int mn=n;
-    int mx= -1;
-    ll sh_cnt=0;
-    vll sh_ind;
+    vll vec(n);
     fl(i,n){
-        if(s[i]=='*'){
-            mx = max(mx, i);
-            mn = min(mn, i);
-            sh_cnt++;
-            sh_ind.pb(i);
+        cin>>vec[i];
+    }
+    vll capacity(n);
+    fl(i,n){
+        cin>>capacity[i];
+    }
+    vll pref(n+1);
+    for(int i=1; i<=n; i++){
+        pref[i]= pref[i-1]+capacity[i-1];
+    }
+    // printvec(pref);
+    vpll segments;
+    vll res(n);
+    fl(i,n){
+        ll ind = get_ind(i,pref, vec);
+        // cout<<ind<<" ";
+        if(ind == n-1){
+            segments.pb(mp(i,n));
+        }
+        else{
+            if(ind == -1){
+                res[i]+= (vec[i]);
+            }
+            else{
+                segments.pb(mp(i,ind+1));
+                res[ind+1] += vec[i]-(pref[ind+1]-pref[i]);
+            }
         }
     }
-    if(mx==-1){
-        cout<<0<<endl;
-        return;
+    // cout<<endl;
+    // printvec(res);
+    Segtree st(n);
+    fl(i, segments.size()){
+        st.add(segments[i].ff, segments[i].ss, 1);
     }
-    else if(mx-mn+1==sh_cnt){
-        cout<<0<<endl;
-        return;
+    fl(i,n){
+        res[i] += (st.get(i))*capacity[i];
     }
+    printvec(res);
 
-    else{
-        ll res=0;
-        ll mid_bakri = sh_ind[(sh_cnt-1)/2];
-        
-        int i= mid_bakri-1;
-        int j = mid_bakri-1;
-        while(i>=0){
-            if(s[i]=='*'){
-                res+= j-i;
-                j--;
-            }
-            i--;
-        }
-        i = mid_bakri+1;
-        j = mid_bakri+1;
-        while(i<n){
-            if(s[i]=='*'){
-                res += i-j;
-                j++;
-            }
-            i++;
-        }
-        cout<<res<<endl;
-        return;
-    }
-    
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

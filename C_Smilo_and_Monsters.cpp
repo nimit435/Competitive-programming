@@ -108,58 +108,51 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
+
+
 void solve() {
     ll n;
     cin>>n;
-    string s;
-    cin>>s;
-    int mn=n;
-    int mx= -1;
-    ll sh_cnt=0;
-    vll sh_ind;
+    vll vec(n);
     fl(i,n){
-        if(s[i]=='*'){
-            mx = max(mx, i);
-            mn = min(mn, i);
-            sh_cnt++;
-            sh_ind.pb(i);
+        cin>>vec[i];
+    }
+    sort(vec.begin(), vec.end());
+    // printvec(vec);
+    ll left= 0;
+    ll right =n-1;
+    ll att_cnt = 0;
+    ll x=0;
+    while(left <= right && left<n && right>=0){
+        // cout<<left<<" "<<right<<" "<<x<<" "<<att_cnt<<endl;
+        if(left!=right){
+            if(x+vec[left]<vec[right]){
+                x+=vec[left];
+                att_cnt+=vec[left];
+                left++;
+            }
+            else{
+                att_cnt+= vec[right]-x+1;
+                
+                vec[left]= vec[left]+x-vec[right];
+                x = 0;
+                right--;
+            }
+        }
+        else{
+            if(vec[left]==1 || vec[left]==2 || vec[left]==0){
+                att_cnt+= vec[left];
+                
+            }
+            else{
+                att_cnt += ceil((lld)(vec[left]-x)/2)+1;
+            }
+            left++;
         }
     }
-    if(mx==-1){
-        cout<<0<<endl;
-        return;
-    }
-    else if(mx-mn+1==sh_cnt){
-        cout<<0<<endl;
-        return;
-    }
+    cout<<att_cnt<<endl;
 
-    else{
-        ll res=0;
-        ll mid_bakri = sh_ind[(sh_cnt-1)/2];
-        
-        int i= mid_bakri-1;
-        int j = mid_bakri-1;
-        while(i>=0){
-            if(s[i]=='*'){
-                res+= j-i;
-                j--;
-            }
-            i--;
-        }
-        i = mid_bakri+1;
-        j = mid_bakri+1;
-        while(i<n){
-            if(s[i]=='*'){
-                res += i-j;
-                j++;
-            }
-            i++;
-        }
-        cout<<res<<endl;
-        return;
-    }
-    
+
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

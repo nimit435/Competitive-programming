@@ -111,55 +111,73 @@ ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 void solve() {
     ll n;
     cin>>n;
-    string s;
-    cin>>s;
-    int mn=n;
-    int mx= -1;
-    ll sh_cnt=0;
-    vll sh_ind;
-    fl(i,n){
-        if(s[i]=='*'){
-            mx = max(mx, i);
-            mn = min(mn, i);
-            sh_cnt++;
-            sh_ind.pb(i);
+    ll m; 
+    cin>>m;
+    ll temp = n;
+    ll two_cnt = 0;
+    ll five_cnt = 0;
+    while(temp%2==0){
+        two_cnt++;
+        temp = temp/2;
+    }
+    temp = n;
+    while(temp%5==0){
+        five_cnt++;
+        temp=temp/5;
+    }
+    ll mul = 1;
+    if(five_cnt==two_cnt){
+        while(mul*10<=m){
+            mul*=10;
+        }
+        if(mul==m){
+            cout<<n*m<<endl;
+            return;
+        }
+        else{
+            mul = mul*(m/mul);
+            cout<<n*mul<<endl;
+            return;
         }
     }
-    if(mx==-1){
-        cout<<0<<endl;
-        return;
+    if(five_cnt>two_cnt){
+        ll inc = five_cnt-two_cnt;
+        while((five_cnt!=two_cnt) && mul*2<=m){
+            mul*=2;
+            two_cnt++;
+        }
+        while(mul*10<=m){
+            mul*=10;
+        }
+        if(mul==m){
+            cout<<n*m<<endl;
+            return;
+        }
+        else{
+            mul = mul*(m/mul);
+            cout<<n*mul<<endl;
+            return;
+        }  
     }
-    else if(mx-mn+1==sh_cnt){
-        cout<<0<<endl;
-        return;
-    }
-
     else{
-        ll res=0;
-        ll mid_bakri = sh_ind[(sh_cnt-1)/2];
-        
-        int i= mid_bakri-1;
-        int j = mid_bakri-1;
-        while(i>=0){
-            if(s[i]=='*'){
-                res+= j-i;
-                j--;
-            }
-            i--;
+        ll inc = two_cnt-five_cnt;
+        while((five_cnt!=two_cnt) && mul*5<=m){
+            mul*=5;
+            five_cnt++;
         }
-        i = mid_bakri+1;
-        j = mid_bakri+1;
-        while(i<n){
-            if(s[i]=='*'){
-                res += i-j;
-                j++;
-            }
-            i++;
+        while(mul*10<=m){
+            mul*=10;
         }
-        cout<<res<<endl;
-        return;
+        if(mul==m){
+            cout<<n*m<<endl;
+            return;
+        }
+        else{
+            mul = mul*(m/mul);
+            cout<<n*mul<<endl;
+            return;
+        }
     }
-    
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

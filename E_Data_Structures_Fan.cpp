@@ -111,55 +111,50 @@ ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 void solve() {
     ll n;
     cin>>n;
-    string s;
-    cin>>s;
-    int mn=n;
-    int mx= -1;
-    ll sh_cnt=0;
-    vll sh_ind;
+    vll vec(n);
     fl(i,n){
-        if(s[i]=='*'){
-            mx = max(mx, i);
-            mn = min(mn, i);
-            sh_cnt++;
-            sh_ind.pb(i);
+        cin>>vec[i];
+    }
+    string st; 
+    cin>>st;
+    vll xoxo(n+1);
+    for(int i=1; i<=n; i++){
+        xoxo[i] = xoxo[i-1]^vec[i-1];
+    }
+    ll q;
+    cin>>q;
+    ll zer=0;
+    ll one=0;
+    fl(i,n){
+        if(st[i]=='0'){
+            zer = zer^vec[i];
+        }
+        else{
+            one = one^vec[i];
         }
     }
-    if(mx==-1){
-        cout<<0<<endl;
-        return;
-    }
-    else if(mx-mn+1==sh_cnt){
-        cout<<0<<endl;
-        return;
-    }
-
-    else{
-        ll res=0;
-        ll mid_bakri = sh_ind[(sh_cnt-1)/2];
-        
-        int i= mid_bakri-1;
-        int j = mid_bakri-1;
-        while(i>=0){
-            if(s[i]=='*'){
-                res+= j-i;
-                j--;
+    fl(i,q){
+        ll a;
+        cin>>a;
+        if(a==2){
+            ll b;
+            cin>>b;
+            if(b==0){
+                cout<<zer<<" ";
             }
-            i--;
-        }
-        i = mid_bakri+1;
-        j = mid_bakri+1;
-        while(i<n){
-            if(s[i]=='*'){
-                res += i-j;
-                j++;
+            else{
+                cout<<one<<" ";
             }
-            i++;
         }
-        cout<<res<<endl;
-        return;
+        else{
+            ll l,r;
+            cin>>l>>r;
+            ll x = xoxo[r]^xoxo[l-1];
+            zer = zer^x;
+            one = one^x;
+        }
     }
-    
+    cout<<endl;
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

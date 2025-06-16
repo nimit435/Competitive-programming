@@ -108,56 +108,66 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-void solve() {
-    ll n;
-    cin>>n;
-    string s;
-    cin>>s;
-    int mn=n;
-    int mx= -1;
-    ll sh_cnt=0;
-    vll sh_ind;
-    fl(i,n){
-        if(s[i]=='*'){
-            mx = max(mx, i);
-            mn = min(mn, i);
-            sh_cnt++;
-            sh_ind.pb(i);
-        }
+ll func(ll i, ll k , vll& pal , vvll& dp){
+    ll MOD = 1000000007;
+    if(i==1 || i==0){
+        return 1;
     }
-    if(mx==-1){
-        cout<<0<<endl;
-        return;
+    if(k==0){
+        return 1;
     }
-    else if(mx-mn+1==sh_cnt){
-        cout<<0<<endl;
-        return;
+    if(dp[i][k]!=-1){
+        return dp[i][k];
     }
-
+    if(i<pal[k]){
+        dp[i][k] = (func(i, k-1, pal, dp))%MOD;
+    }
     else{
-        ll res=0;
-        ll mid_bakri = sh_ind[(sh_cnt-1)/2];
+        dp[i][k] = (func(i, k-1, pal, dp) + func(i-pal[k], k, pal, dp))%MOD;
+    }
+    return dp[i][k];
+}
+void solve() {
+    vector<ll> pal;
+    for(int i=1; i<=9; i++){
+        pal.pb(i);
+    }
+    for(int i=1; i<=9; i++){
+        pal.pb((i*10)+i);
+    }
+    for(int i=0; i<=9; i++){
+        for(int j=1; j<=9; j++){
+            pal.pb((j*100)+(i*10)+j);
+        }
+    }
+    for(int i=0; i<=9; i++){
+        for(int j=1; j<=9; j++){
+            pal.pb((j*1000)+(i*100)+(i*10)+j);
+        }
+    }
+    for(int i=0; i<=9; i++){
+        for(int j=0; j<=9; j++){
+            for(int k=1; k<=9; k++){
+                ll num = (k*10000)+(j*1000)+(i*100)+(j*10)+k;
+                if(num<=40000){
+                    pal.pb(num);
+                }
+            }
+        }
+    }
+    sort(pal.begin(), pal.end());
+
+    ll t;
+    cin>>t;
+    vvll dp(40000+10,vll(pal.size()+10,-1));
+
+    while(t--){
+        ll n;
+        cin>>n;
+        ll res = func(n, pal.size()-1, pal, dp);
+
         
-        int i= mid_bakri-1;
-        int j = mid_bakri-1;
-        while(i>=0){
-            if(s[i]=='*'){
-                res+= j-i;
-                j--;
-            }
-            i--;
-        }
-        i = mid_bakri+1;
-        j = mid_bakri+1;
-        while(i<n){
-            if(s[i]=='*'){
-                res += i-j;
-                j++;
-            }
-            i++;
-        }
         cout<<res<<endl;
-        return;
     }
     
 }
@@ -165,10 +175,6 @@ void solve() {
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t;
-    cin >> t;
-    fl(i, t) {
-        solve();
-    }
+    solve();
     return 0;
 }

@@ -111,55 +111,40 @@ ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 void solve() {
     ll n;
     cin>>n;
-    string s;
-    cin>>s;
-    int mn=n;
-    int mx= -1;
-    ll sh_cnt=0;
-    vll sh_ind;
+    ll m;
+    cin>>m;
+    ll num = 0;
+    vll zer_cnt;
     fl(i,n){
-        if(s[i]=='*'){
-            mx = max(mx, i);
-            mn = min(mn, i);
-            sh_cnt++;
-            sh_ind.pb(i);
+        string str;
+        cin>>str;
+        ll k= str.size();
+        num += k;
+        k--;
+        ll j = 0;
+        while(str[k]=='0'){
+            j++;
+            k--;
         }
-    }
-    if(mx==-1){
-        cout<<0<<endl;
-        return;
-    }
-    else if(mx-mn+1==sh_cnt){
-        cout<<0<<endl;
-        return;
+        if(j>0){
+            zer_cnt.pb(j);
+        }
     }
 
-    else{
-        ll res=0;
-        ll mid_bakri = sh_ind[(sh_cnt-1)/2];
-        
-        int i= mid_bakri-1;
-        int j = mid_bakri-1;
-        while(i>=0){
-            if(s[i]=='*'){
-                res+= j-i;
-                j--;
-            }
-            i--;
-        }
-        i = mid_bakri+1;
-        j = mid_bakri+1;
-        while(i<n){
-            if(s[i]=='*'){
-                res += i-j;
-                j++;
-            }
-            i++;
-        }
-        cout<<res<<endl;
-        return;
+    sort(zer_cnt.rbegin(),zer_cnt.rend());
+    // cout<<num<<endl;
+    // printvec(zer_cnt);
+    for(int i=0; i<zer_cnt.size(); i+=2){
+        num -= zer_cnt[i];
     }
-    
+    // cout<<num<<endl;
+
+    if(num>m){
+        cout<<"Sasha"<<endl;
+    }
+    else{
+        cout<<"Anna"<<endl;
+    }
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

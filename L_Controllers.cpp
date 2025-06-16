@@ -111,64 +111,62 @@ ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 void solve() {
     ll n;
     cin>>n;
-    string s;
-    cin>>s;
-    int mn=n;
-    int mx= -1;
-    ll sh_cnt=0;
-    vll sh_ind;
+    string st;
+    cin>>st;
+    ll k1=0;
     fl(i,n){
-        if(s[i]=='*'){
-            mx = max(mx, i);
-            mn = min(mn, i);
-            sh_cnt++;
-            sh_ind.pb(i);
+        if(st[i]=='+'){
+            k1++;
         }
     }
-    if(mx==-1){
-        cout<<0<<endl;
-        return;
-    }
-    else if(mx-mn+1==sh_cnt){
-        cout<<0<<endl;
-        return;
+    ll k2= n-k1;
+    ll q;
+    cin>>q;
+    while(q--){
+        ll a,b;
+        cin>>a>>b;
+        if(k1==k2){
+            cout<<"YES"<<endl;
+        }
+        else if(a==b){
+            
+            cout<<"NO"<<endl;
+            
+        }
+        else{
+            if(a<b){
+                swap(a,b);
+            }
+            if(((k1-k2)*b)%(a-b)!=0){
+                cout<<"NO"<<endl;
+            }
+            else{
+                ll t = ((k2-k1)*b)/(a-b);
+                if(t<0){
+                    if(-t<=k2){
+                        cout<<"YES"<<endl;
+                    }
+                    else{
+                        cout<<"NO"<<endl;
+                    }
+                }
+                else{
+                    if(t<=k1){
+                        cout<<"YES"<<endl;
+                    }
+                    else{
+                        cout<<"NO"<<endl;
+                    }
+                }
+            }
+        }
     }
 
-    else{
-        ll res=0;
-        ll mid_bakri = sh_ind[(sh_cnt-1)/2];
-        
-        int i= mid_bakri-1;
-        int j = mid_bakri-1;
-        while(i>=0){
-            if(s[i]=='*'){
-                res+= j-i;
-                j--;
-            }
-            i--;
-        }
-        i = mid_bakri+1;
-        j = mid_bakri+1;
-        while(i<n){
-            if(s[i]=='*'){
-                res += i-j;
-                j++;
-            }
-            i++;
-        }
-        cout<<res<<endl;
-        return;
-    }
-    
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t;
-    cin >> t;
-    fl(i, t) {
-        solve();
-    }
+    solve();
     return 0;
 }
