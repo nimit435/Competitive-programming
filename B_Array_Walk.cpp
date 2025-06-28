@@ -108,48 +108,51 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-
 void solve() {
     ll n;
     cin>>n;
     ll k;
     cin>>k;
-    ll MOD = 1000000007;
-    ll res = 0;
-    if(k==1){
-        cout<<1<<endl;
-        return;
+    ll z;
+    cin>>z;
+    vll vec(n);
+    fl(i,n){
+        cin>>vec[i];
     }
-    if(k==2){
-        cout<<1+n<<endl;
-        return;
-    }
-    if(n==1){
-        cout<<2<<endl;
-        return;
-    }
-
-    vll vec(n-1);
-    fl(i,n-1){
-        vec[i] = i+1;
-    }
-    res = 1 + n;
-    k-=2;
-    while(k>0){
-        res = (res+sumvec(vec))%MOD;
-        vll temp(n-1);
-        
-        temp[0] = vec[n-2];
-        ll j = n-3;
-        for(int i=1; i<n-1; i++){
-            temp[i] = (temp[i-1]+vec[j])%MOD;
-            j--;
+    ll mx = 0;
+    fl(j,z+1){
+        if(j==0){
+            ll res = 0;
+            fl(i,k+1){
+                res+= vec[i];
+            }
+            mx = max(mx, res);
+            
         }
-        vec = temp;
-        k--;
+        else{
+            ll res = 0;
+            if(k>=2*j){
+                fl(i, k-(2*j)+2){
+                    res += vec[i];
+                }
+                // cout<<res<<endl;
+                mx = max(mx, res+ (j*vec[k-(2*j)]) + ((j-1)*vec[k-(2*j)+1]));
+                // cout<<j<<" "<<res+ (j*vec[k-(2*j)]) + ((j-1)*vec[k-(2*j)+1])<<endl;
+                ll r = 0;
+                if(k>2*j){
+                    fl(i,k-(2*j)){
+                        r= max(r, vec[i]+vec[i+1]);
+                    }
+                    res -= vec[k-(2*j)+1];
+                    mx = max(mx, res+ (j*(r)));
+                    // cout<<j<<" "<<res+ (j*(r))<<endl;
+                }
+                
+            }
+            
+        }
     }
-    cout<<res<<endl;
-
+    cout<<mx<<endl;
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

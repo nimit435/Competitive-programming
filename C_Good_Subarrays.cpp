@@ -108,48 +108,33 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-
 void solve() {
     ll n;
     cin>>n;
-    ll k;
-    cin>>k;
-    ll MOD = 1000000007;
-    ll res = 0;
-    if(k==1){
-        cout<<1<<endl;
-        return;
+    string st;
+    cin>>st;
+    vll vec(n);
+    fl(i,n){
+        vec[i] = st[i]-'0';
     }
-    if(k==2){
-        cout<<1+n<<endl;
-        return;
+    vll pref(n+1);
+    for(int i=1; i<=n; i++){
+        pref[i] = pref[i-1]+vec[i-1];
     }
-    if(n==1){
-        cout<<2<<endl;
-        return;
-    }
+    // printvec(vec);
+    // printvec(pref);
 
-    vll vec(n-1);
-    fl(i,n-1){
-        vec[i] = i+1;
+    map<ll,ll> hm;
+    fl(i,n+1){
+        hm[pref[i]-i]++;
     }
-    res = 1 + n;
-    k-=2;
-    while(k>0){
-        res = (res+sumvec(vec))%MOD;
-        vll temp(n-1);
-        
-        temp[0] = vec[n-2];
-        ll j = n-3;
-        for(int i=1; i<n-1; i++){
-            temp[i] = (temp[i-1]+vec[j])%MOD;
-            j--;
+    ll res = 0;
+    for(auto it: hm){
+        if(it.ss>1){
+            res += (it.ss*(it.ss-1))/2;
         }
-        vec = temp;
-        k--;
     }
     cout<<res<<endl;
-
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

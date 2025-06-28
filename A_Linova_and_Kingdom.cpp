@@ -108,57 +108,89 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
+bool comp(pair<ll,pll>& a, pair<ll,pll>& b){
+    if(a.ss.ff!=b.ss.ff){
+        return a.ss.ff>b.ss.ff;
+    }
+    else{
+        return a.ss.ss>b.ss.ss;
+    }
+}
+void func(ll i ,ll par, ll curr, vvll& graph, vll& depth){
+    if(graph[i].size()==1 && graph[i][0]==par){
+        depth[i] = curr;
+        // depth[i].ss.ss = 1;
+        return;
+    }
+    
+    depth[i] = curr;
+    for(auto it: graph[i]){
+        if(it!=par){
+            func(it, i, curr+1, graph, depth);
+        }
+    }
+}
+ll func2(ll i, ll par, vvll& graph, vll& size){
+    if(graph[i].size()==1 && graph[i][0] ==par ){
+        size[i] = 1;
+        // cout<<i<<" ";
+        return 1;
+    }
+    if(size[i]!=-1){
+        return size[i];
+    }
+    size[i]=1;
+    for(auto it : graph[i]){
+        if(it!=par){
+            size[i] +=  func2(it, i, graph, size);
+        }
+    }
+    return size[i];
 
+}
 void solve() {
     ll n;
     cin>>n;
     ll k;
     cin>>k;
-    ll MOD = 1000000007;
-    ll res = 0;
-    if(k==1){
-        cout<<1<<endl;
-        return;
-    }
-    if(k==2){
-        cout<<1+n<<endl;
-        return;
-    }
-    if(n==1){
-        cout<<2<<endl;
-        return;
-    }
-
-    vll vec(n-1);
+    vvll graph(n);
     fl(i,n-1){
-        vec[i] = i+1;
+        ll a;
+        ll b;
+        cin>>a;
+        cin>>b;
+        a--;
+        b--;
+        graph[a].pb(b);
+        graph[b].pb(a);
     }
-    res = 1 + n;
-    k-=2;
-    while(k>0){
-        res = (res+sumvec(vec))%MOD;
-        vll temp(n-1);
-        
-        temp[0] = vec[n-2];
-        ll j = n-3;
-        for(int i=1; i<n-1; i++){
-            temp[i] = (temp[i-1]+vec[j])%MOD;
-            j--;
-        }
-        vec = temp;
-        k--;
+    vll depth(n);
+    func(0, -1, 1, graph, depth);
+    vll size(n,-1);
+    func2(0, -1, graph, size);
+    // cout<<endl;
+
+    // printvec(depth);
+    vll res(n);
+    fl(i,n){
+        res[i] = size[i]-depth[i];
     }
-    cout<<res<<endl;
+    sort(res.rbegin(), res.rend());
+    // printvec(res);
+
+    ll ans =0;
+    fl(i,n-k){
+        ans += res[i];
+    }
+   
+    cout<<ans<<endl;
+
 
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t;
-    cin >> t;
-    fl(i, t) {
-        solve();
-    }
+    solve();
     return 0;
 }
