@@ -7,4 +7,4 @@ venv/
 .pytest_cache/
 .vscode/
 nim/
-outler_work/
+outlier_work/
