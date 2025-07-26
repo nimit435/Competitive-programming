@@ -4,3 +4,7 @@ __pycache__/
 .cph/
 .vscode/
 venv/
+.pytest_cache/
+.vscode/
+nim/
+outler_work/
