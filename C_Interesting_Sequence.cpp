@@ -108,105 +108,66 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-bool helper(vll &vec, vvll &div, ll d, ll m, ll n){
-    vll nums(m);
-    ll num = 0;
-    for(int i=1; i<=d; i++){
-        if(vec[i]!=0){
-            for(auto it : div[i]){
-                nums[it-1]++;
-            }
-        }
-    }
-    // 0 0 0 1 0 0 0 1
-
-    fl(i,m){
-        if(nums[i]!=0){
-            num++;
-        }
-    }
-    if(num==m){
-        return true;
-    }
-    for(int i=2; i<=n-d+1; i++){
-        ll add = i+d-1;
-        ll sub = i-1;
-        if(vec[sub]!=0){
-            for(auto it: div[sub]){
-                nums[it-1]--;
-                if(nums[it-1]==0){
-                    num--;
-                }
-            }
-        }
-        if(vec[add]!=0){
-            for(auto it: div[add]){
-                
-                if(nums[it-1]==0){
-                    num++;
-                }
-                nums[it-1]++;
-            }
-        }
-        if(num==m){
-            return true;
-        }
-    } // n-1-i+1=d
-    return false;
-}
 void solve() {
     ll n;
     cin>>n;
-    ll m;
-    cin>>m;
-    vll temp(n);
-    ll mx = 0;
-    fl(i,n){
-        cin>>temp[i];
-        mx = max(mx, temp[i]);
+    ll x;
+    cin>>x;
+    vll vec(64);
+    if(n%2!=0){
+        vec[0] = 1;
     }
-    vll vec(mx+1);
-    fl(i,n){
-        if(vec[temp[i]]==0){
-            vec[temp[i]] = 1;
-        }
+    if(n==x){
+        cout<<n<<endl;
+        return;
     }
-    vvll div(mx+1);
-    set<ll> s;
-    for(int i=1; i<=n; i++){
-        ll num = temp[i-1];
-        if(s.find(num)==s.end()){
-            for (int j = 1; j <= sqrt(num); ++j) { 
-                if (num % j == 0 && j<=m) { 
-                    div[num].push_back(j); 
-                    if (j != (num / j) && (num/j)<=m) {
-                        div[num].push_back(num / j); 
+    else if(x>n){
+        cout<<-1<<endl;
+        return;
+    }
+    for(int i=1; i<64; i++){
+        if(((1LL<<i)&n)>0){
+            if((1LL<<(i-1)&n)==0){
+                ll temp = 0;
+                for(int j = 0; j<i; j++){
+                    if(((1LL<<j)&n)==0){
+                        temp += (1LL<<j);
                     }
                 }
-            }
-        } 
-    }
-    // printvec(vec);
-    // printvec(div);
-
-    if(!helper(vec, div, mx, m, mx)){
-        cout<<-1<<endl;
-    }
-    else{
-        ll left = 0;
-        ll right = mx;
-        while(right-left>1){
-            ll mid = (right+left)/2;
-            if(helper(vec, div, mid, m , mx)){
-                right = mid;
+                temp ++;
+                vec[i] = temp;
             }
             else{
-                left = mid;
+                vec[i] = vec[i-1];
             }
         }
-        cout<<left<<endl;
     }
-    
+    // printvec(vec);
+    ll mx = LLONG_MAX;
+    ll mn = 0;
+    for(int i= 0; i<64; i++){
+        if(mn>mx){
+            cout<<-1<<endl;
+            return;
+        }
+        bool a = ((1LL<<i)&x)>0;
+        bool b = ((1LL<<i)&n)>0;
+        if(a && !b){
+            cout<<-1<<endl;
+            return;
+        }
+        else if(!a && b){
+            mn = max(mn, vec[i]);
+        }
+        else if(a){
+            mx = min(mx , vec[i]-1);
+        }
+    }
+    if(mn>mx){
+        cout<<-1<<endl;
+        return;
+    }
+    cout<<n+mn<<endl;
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

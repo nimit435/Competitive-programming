@@ -106,116 +106,68 @@ bool isPerfectSquare(ll x) { if (x >= 0) { ll sr = sqrt(x); return (sr * sr == x
 ll merge(vector<ll> &arr, ll low, ll mid, ll high) {vector<int> temp;ll left = low;ll right = mid + 1;ll cnt = 0;while (left <= mid && right <= high) {if (arr[left] <= arr[right]) {temp.push_back(arr[left]);left++;}else {temp.push_back(arr[right]);cnt += (mid - left + 1);right++;}}while (left <= mid) {temp.push_back(arr[left]);left++;}while (right <= high) {temp.push_back(arr[right]);right++;}for (int i = low; i <= high; i++) {arr[i] = temp[i - low];}return cnt;}
 ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) return cnt;int mid = (low + high) / 2;cnt += mergeSort(arr, low, mid);cnt += mergeSort(arr, mid + 1, high);cnt += merge(arr, low, mid, high);return cnt;}
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
-
-//Code
-bool helper(vll &vec, vvll &div, ll d, ll m, ll n){
-    vll nums(m);
-    ll num = 0;
-    for(int i=1; i<=d; i++){
-        if(vec[i]!=0){
-            for(auto it : div[i]){
-                nums[it-1]++;
-            }
+void precomputeDivisors(vector<vector<ll>>& divisors){
+    for(int i=1; i< divisors.size(); i++){
+        for(int j = 2*i ; j<divisors.size(); j+=i){
+            divisors[j].pb(i);
         }
     }
-    // 0 0 0 1 0 0 0 1
-
-    fl(i,m){
-        if(nums[i]!=0){
-            num++;
-        }
-    }
-    if(num==m){
-        return true;
-    }
-    for(int i=2; i<=n-d+1; i++){
-        ll add = i+d-1;
-        ll sub = i-1;
-        if(vec[sub]!=0){
-            for(auto it: div[sub]){
-                nums[it-1]--;
-                if(nums[it-1]==0){
-                    num--;
-                }
-            }
-        }
-        if(vec[add]!=0){
-            for(auto it: div[add]){
-                
-                if(nums[it-1]==0){
-                    num++;
-                }
-                nums[it-1]++;
-            }
-        }
-        if(num==m){
-            return true;
-        }
-    } // n-1-i+1=d
-    return false;
 }
+//Code
 void solve() {
-    ll n;
+    ll t;
+    cin>>t;
+    vector<vector<ll>> divisors(1000001);
+    precomputeDivisors(divisors);
+
+    while(t--){ll n;
     cin>>n;
-    ll m;
-    cin>>m;
-    vll temp(n);
+    vll vec(n);
     ll mx = 0;
     fl(i,n){
-        cin>>temp[i];
-        mx = max(mx, temp[i]);
+        cin>>vec[i];
     }
-    vll vec(mx+1);
+    unordered_map<ll, ll> cnt;
     fl(i,n){
-        if(vec[temp[i]]==0){
-            vec[temp[i]] = 1;
+        cnt[vec[i]]++;
+    }
+    ll res = 0;
+    set<ll> se;
+    for(int i=0; i<n; i++){
+        se.insert(vec[i]);
+    }
+   
+    for(auto i: se){
+        if(cnt[i]>=3){
+            res+= (cnt[i]*(cnt[i]-1)*(cnt[i]-2));   
         }
     }
-    vvll div(mx+1);
-    set<ll> s;
-    for(int i=1; i<=n; i++){
-        ll num = temp[i-1];
-        if(s.find(num)==s.end()){
-            for (int j = 1; j <= sqrt(num); ++j) { 
-                if (num % j == 0 && j<=m) { 
-                    div[num].push_back(j); 
-                    if (j != (num / j) && (num/j)<=m) {
-                        div[num].push_back(num / j); 
+    
+    
+    for(auto i : se){
+        for(auto it: divisors[i]){
+            if(cnt[it]>0){
+                ll num = it;
+                ll b = i/num;
+                if(num%b==0){
+                    if(cnt[num/b]>0){
+                        ll a = cnt[i];
+                        ll be = cnt[num];
+                        ll c = cnt[num/b];
+                        res += a*be*c;
+                        // cout<< i<<" "<<num<<" "<<num/b<<" "<<b<<endl;
                     }
                 }
             }
-        } 
-    }
-    // printvec(vec);
-    // printvec(div);
-
-    if(!helper(vec, div, mx, m, mx)){
-        cout<<-1<<endl;
-    }
-    else{
-        ll left = 0;
-        ll right = mx;
-        while(right-left>1){
-            ll mid = (right+left)/2;
-            if(helper(vec, div, mid, m , mx)){
-                right = mid;
-            }
-            else{
-                left = mid;
-            }
         }
-        cout<<left<<endl;
     }
-    
+    cout<<res<<endl;}
+
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t;
-    cin >> t;
-    fl(i, t) {
-        solve();
-    }
+    solve();
     return 0;
 }
