@@ -103,148 +103,67 @@ bool isPowerOfTwo(int n) { if (n == 0) return false; return (ceil(log2(n)) == fl
 bool isPerfectSquare(ll x) { if (x >= 0) { ll sr = sqrt(x); return (sr * sr == x); } return false; }
 
 //Number of Inversions
-ll merge(vector<ll> &arr, ll low, ll mid, ll high) {
-    vector<int> temp;
-    ll left = low;
-    ll right = mid + 1;
-    ll cnt = 0;
-    while (left <= mid && right <= high) {
-        if (arr[left] <= arr[right]) {
-            temp.push_back(arr[left]);
-            left++;
-        }
-        else {
-            temp.push_back(arr[right]);
-            cnt += (mid - left + 1);
-            right++;
-        }
-    }
-    while (left <= mid) {
-        temp.push_back(arr[left]);
-        left++;
-    }
-    while (right <= high) {
-        temp.push_back(arr[right]);
-        right++;
-    }
-    for (int i = low; i <= high; i++) {
-        arr[i] = temp[i - low];
-    }
-    return cnt;
-}
-
-ll mergeSort(vector<ll> &arr, ll low, ll high) {
-    int cnt = 0;
-    if (low >= high) return cnt;
-    int mid = (low + high) / 2;
-    cnt += mergeSort(arr, low, mid);
-    cnt += mergeSort(arr, mid + 1, high);
-    cnt += merge(arr, low, mid, high);
-    return cnt;
-}
-
-ll numberOfInversions(vector<ll>&a, ll n) {
-    return mergeSort(a, 0, n - 1);
-}
+ll merge(vector<ll> &arr, ll low, ll mid, ll high) {vector<int> temp;ll left = low;ll right = mid + 1;ll cnt = 0;while (left <= mid && right <= high) {if (arr[left] <= arr[right]) {temp.push_back(arr[left]);left++;}else {temp.push_back(arr[right]);cnt += (mid - left + 1);right++;}}while (left <= mid) {temp.push_back(arr[left]);left++;}while (right <= high) {temp.push_back(arr[right]);right++;}for (int i = low; i <= high; i++) {arr[i] = temp[i - low];}return cnt;}
+ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) return cnt;int mid = (low + high) / 2;cnt += mergeSort(arr, low, mid);cnt += mergeSort(arr, mid + 1, high);cnt += merge(arr, low, mid, high);return cnt;}
+ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-void DFS(vvll& tree, ll i, ll par, vll& h){
+void func2(ll i, ll par, vvll& tree, vll& maxdep, vll& dep){
+    ll mx = 0;
+
     for(auto it: tree[i]){
-        if(it!=par){
-            h[it]=1+h[i];
-            DFS(tree, it, i, h);
+        if(it!= par){
+            func2(it, i, tree, maxdep, dep);
         }
     }
+    for(auto it: tree[i]){
+        if(it!= par){
+            maxdep[i] = max(maxdep[i], maxdep[it]);
+        }
+    }
+    
 }
-ll DFS_2(vvll& tree, ll i, ll par, vll& subtree){
-    if(tree[i].size()==1 && tree[i][0]==par){
-        subtree[i]=0;
-        return 0;
-    }
-    ll mx=0;
+void func(ll i, ll par, vvll& tree, vll& dep){
     for(auto it: tree[i]){
         if(it!=par){
-            mx= max(mx, DFS_2(tree, it, i, subtree));
+            dep[it] = dep[i]+1;
+            func(it, i, tree, dep);
         }
     }
-    subtree[i]= 1+mx;
-    return subtree[i];
 }
 void solve() {
     ll n;
     cin>>n;
     vvll tree(n+1);
     fl(i,n-1){
-        ll a; ll b;
+        ll a,b;
         cin>>a>>b;
         tree[a].pb(b);
-        tree[b].pb(a);
+        tree[b].pb(a); 
     }
-    vll h(n+1);
-    vll sub(n+1);
-    h[1]=0;
+    vll dep(n+1);
+    func(1, -1, tree, dep);
+    vll maxdep(n+1);
+    ll mx = 0;
+    for(int i=1 ; i<=n; i++){
+        maxdep[i] = dep[i];
+        mx = max(dep[i], mx);
+    }
 
-    DFS(tree, 1, -1, h);
-    DFS_2(tree, 1, -1, sub);
-
-
-    vll veca(n+1,0);
-    vll vecb(n+1,0);
+    func2(1,-1,tree,maxdep,dep);
+    vll pref(mx+2);
     for(int i=1; i<=n; i++){
-        veca[h[i]]++;
+        pref[dep[i]]++;
+        pref[maxdep[i]+1]--;
     }
-
-    // printvec(sub);
-    for(int i=1; i<=n; i++){
-        sub[i]= h[i]+sub[i];
+    ll mxn = 0;
+    for(int i=1; i<=mx+1;i++ ){
+        pref[i] = pref[i]+pref[i-1];
+        mxn = max(mxn, pref[i]);
     }
-
-    // printvec(h);
-    // printvec(sub);
-    
-    for(int i=1; i<=n; i++){
-        vecb[sub[i]]++;
-    }
-    // printvec(veca);
-    // printvec(vecb);
-    // for(int i=n-1; i>=0; i--){
-    //     veca[i]=veca[i+1]+veca[i];
-    // }
-    // printvec(veca);
-    // for(int i=1; i<n; i++){
-    //     vecb[i]=vecb[i-1]+vecb[i];
-    // }
-    // printvec(vecb);
-    // vll ans(n+1);
-    // fl(i,n){
-    //     ans[i]= veca[i]+vecb[i];
-    // }
-    // printvec(ans);
-    // cout<<endl;
-    vll pref(n+1,0);
-    for(int i=1; i<=n; i++){
-        pref[i]=pref[i-1]+vecb[i-1];
-    }
-    fl(i,n){
-        vecb[i]= pref[i];
-    }
-    fl(i,n+1){
-        pref[i]=0;
-    }
-    for(int i=n-1; i>=0; i--){
-        pref[i]=pref[i+1]+veca[i];
-    }
+    cout<<n-mxn<<endl;
     // printvec(pref);
-    // cout<<endl;
-    for(int i=0; i<n; i++){
-        vecb[i]=vecb[i]+pref[i+1];
-    }
-    ll mn= 1e18;
-    fl(i, sub[1]+1){
-        mn= min(mn, vecb[i]);
-    }
-    cout<<mn<<endl;
-    
+
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
