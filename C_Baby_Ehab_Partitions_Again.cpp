@@ -108,124 +108,116 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-ll ask(vll& vec){
-    cout<<"? ";
-    cout<<vec.size()<<" ";
-    printvec(vec);
-    ll res;
-    cin>>res;
+bool func(ll i, ll sum, vll& vec, vvll& dp){
+    if(sum == 0){
+        return true;
+    }
+    if(i<0){
+        return false;
+    }
+    if(dp[i][sum]!=-1){
+        if(dp[i][sum]==0){
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+    if(sum-vec[i]>=0){
+        bool res = func(i-1, sum-vec[i], vec, dp)||func(i-1, sum, vec, dp);
+        if(res){
+            dp[i][sum] = 1;
+        }
+        else{
+            dp[i][sum] = 0;
+        }
+        return res;
+    }
+    bool res = func(i-1, sum, vec, dp);
+    if(res){
+        dp[i][sum] = 1;
+    }
+    else{
+        dp[i][sum] = 0;
+    }
     return res;
 }
+
 void solve() {
     ll n;
     cin>>n;
-    
-    ll op = -1;
-    ll cl = -1;
-    vll vec;
-    fl(i,n){
-        vec.pb(i+1);
-    }
-    ll res = ask(vec);
-    if(res==0){ // ))((
-        op = n;
-        cl = 1;
-    }
-    else{
-        ll left =  1; //f(1..left)=0 // ))))))(((()
-        ll right = n; //f(1..right)>0
-        while(right-left>1){
-            ll mid = (left+right)/2;
-            vec.clear();
-            for(int i=1; i<=mid; i++){
-                vec.pb(i);
-            }
-            if(ask(vec)==0){
-                left = mid;
-            }
-            else{
-                right = mid;
-            }
-        }
-        op = left;
-        cl = right;
-    }
-    vector<char> fin(n);
-    fin[op-1] = '(';
-    fin[cl-1] = ')';
 
-    queue<ll> q;
-    for(int i=1; i<=n; i++){
-        if(i!=op && i!=cl){
-            q.push(i);
-        }
+    vll vec(n);
+
+    fl(i,n){
+        cin>>vec[i];
     }
-    while(q.size()>=2){
-        ll a = q.front();
-        q.pop();
-        ll b = q.front();
-        q.pop();  // a)b)() 
-        /*
-        a->( b->( -> 6 ()()()
-        a->( b->) -> 2 ()))()
-        a->) b->( -> 3 ))()()
-        a->) b->) -> 1 ))))()
-        */
-        vec.clear();
-        vec.pb(a);
-        vec.pb(cl);
-        vec.pb(b);
-        vec.pb(cl);
-        vec.pb(op);
-        vec.pb(cl);
-        ll ans = ask(vec);
-        if(ans==6){
-            fin[a-1] = '(';
-            fin[b-1] = '(';
-        }
-        else if(ans==2){
-            fin[a-1] = '(';
-            fin[b-1] = ')';
-        }
-        else if(ans==3){
-            fin[a-1] = ')';
-            fin[b-1] = '(';
+    ll a = sumvec(vec);
+
+    if(a%2!=0){
+        cout<<0<<endl;
+        return;
+    }
+    
+    if(n==2){
+        if(vec[1]==vec[0]){
+            cout<<1<<endl;
+            cout<<1<<endl;
         }
         else{
-            fin[a-1] = ')';
-            fin[b-1] = ')';
+            cout<<0<<endl;
+        }
+        return;
+    }
+    
+    
+    vvll dp(n, vector<ll>((a/2)+10,-1));
+    if(!func(n-1, a/2 , vec, dp )){
+        cout<<0<<endl;
+        return;
+    }
+    fl(i,n){
+        if(vec[i]%2!=0){
+            cout<<1<<endl;
+            cout<<i+1<<endl;
+            return;
         }
     }
-    if(!q.empty()){
-        ll a = q.front();
-        q.pop();
-        // ))) -> 0 )()-> 1
-        vec.clear();
-        vec.pb(cl);
-        vec.pb(a);
-        vec.pb(cl);
-        ll ans = ask(vec);
-        if(ans==0){
-            fin[a-1] = ')';
+
+    fl(i,n){
+        if(vec[i]%4!=0){
+            cout<<1<<endl;
+            cout<<i+1<<endl;
+            return;
         }
-        else{
-            fin[a-1] = '(';
-        }
-    } 
-    cout<<"! ";
-    fl(i,n){ // )(())   ))()()  )))
-        cout<<fin[i];
     }
-    cout<<endl;
+    
+    while(true){
+        fl(i,n){
+            vec[i] = vec[i]/4;
+        }
+        fl(i,n){
+            if(vec[i]%2!=0){
+                cout<<1<<endl;
+                cout<<i+1<<endl;
+                return;
+            }
+        }
+
+        fl(i,n){
+            if(vec[i]%4!=0){
+                cout<<1<<endl;
+                cout<<i+1<<endl;
+                return;
+            }
+        }
+    }
+
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t;
-    cin >> t;
-    fl(i, t) {
-        solve();
-    }
+    solve();
     return 0;
 }
