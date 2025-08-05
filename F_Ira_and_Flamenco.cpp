@@ -108,45 +108,56 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-ll func(vll& vec, ll l){
-    vll temp;
-    multiset<ll> s;
-    fl(i,l){
-        s.insert(vec[i]);
-    }
-    fl(i,3){
-        ll a = *s.rbegin();
-        temp.pb(a);
-        auto it = s.find(a);
-        s.erase(it);       
-    }//k-i+1=l. l+(n-l)-1
-    fl(i,3){
-        s.insert(temp[i]);
-    }
-    ll sum = sumvec(temp);
-    for(int i=1; i<=vec.size()-l; i++ ){
-        auto it = s.find(vec[i-1]);
-        s.erase(it);
-        s.insert(vec[l+i-1]);
-        temp.clear();
-        fl(i,3){
-            ll a = *s.rbegin();
-            temp.pb(a);
-            auto it = s.find(a);
-            s.erase(it);
-        }
-        fl(i,3){
-            s.insert(temp[i]);
-        }
-        sum = max(sum, sumvec(temp));
-    }
-    return sum - l-1;
-}
 void solve() {
     ll n;
     cin>>n;
-    
+    ll m;
+    cin>>m;
+    vll vec(n);
+    fl(i,n){
+        cin>>vec[i];
+    }
+    sort(vec.begin(), vec.end());
+    map<ll,ll> hm;
+    fl(i,n){
+        hm[vec[i]]++;
+    }
+    vpll cnt;
+    for(auto it: hm){
+        cnt.pb(it);
+    }
+    ll left = 0;
+    ll res = 0;
+    ll MOD = (1e9)+7;
+    // printvec(cnt);
+    while(left<cnt.size()){
+        ll r = left+1;
+        while(r<cnt.size() && cnt[r].ff==cnt[r-1].ff+1){
+            r++;
+        }
+        // cout<<r<<endl;
+        if(r-left>=m){
+            ll mul = 1;
+            
+            for(int i=left; i<left+m; i++){
+                mul = (mul*cnt[i].ss)%MOD;
+            }
+            // cout<<mul<<endl;
+            res = (res+mul)%MOD;
+            for(int i= left+1; i<=r-m; i++){
+                ll den = powermod(cnt[i-1].ss, MOD-2, MOD);
+                mul = (mul*den)%MOD;
+                mul = (mul*cnt[i-1+m].ss)%MOD;
+                res = (res+mul)%MOD;
+                // cout<<mul<<endl;
+            }
+            
+        }
+        left = r;
+    }
+    cout<<res<<endl;
 }
+
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
