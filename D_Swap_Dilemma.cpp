@@ -100,6 +100,13 @@ bool isPowerOfTwo(int n) { if (n == 0) return false; return (ceil(log2(n)) == fl
 bool isPerfectSquare(ll x) { if (x >= 0) { ll sr = sqrt(x); return (sr * sr == x); } return false; }
 
 //Code
+void swap_in_b(vll& b, map<ll,set<ll>>& hm, ll i, ll j){
+    hm[b[i]].erase(i);
+    hm[b[j]].erase(j);
+    hm[b[i]].insert(j);
+    hm[b[j]].insert(i);
+    swap(b[i],b[j]);
+}
 void solve() {
     ll n;
     cin >> n;
@@ -111,35 +118,67 @@ void solve() {
     fl(i,n){
         cin>>b[i];
     }
-    ll dpa[200010];
-    memset(dpa,-1, sizeof(dpa));
-    
-
-    fl(i,n){
-        dpa[a[i]]=i;
-    }
-    ll pos=0;
-    ll neg=0;
-    fl(i,n){
-        if(dpa[b[i]]==-1){
-            cout<<"NO"<<endl;
+    if(n==1){
+        if(a[0]==b[0]){
+            cout<<"YES"<<endl;
             return;
         }
         else{
-            if(dpa[b[i]]-i>=0){
-                pos+=dpa[b[i]]-i;
-            }
-            else{
-                neg+= i-dpa[b[i]];
-            }
+            cout<<"NO"<<endl;
+            return;
         }
     }
-    if(pos==neg && pos%2==0){
+    if(n==2){
+        if(a[0]==b[0] && a[1]==b[1]){
+            cout<<"YES"<<endl;
+            return;
+        }
+        else{
+            cout<<"NO"<<endl;
+            return;
+        }
+    }
+    map<ll,ll> hma;
+    map<ll,ll> hmb;
+    fl(i,n){
+        hma[a[i]]++;
+        hmb[b[i]]++;
+    }
+    for(auto it: hma){
+        if(it.ss != hmb[it.ff]){
+            cout<<"NO"<<endl;
+            return;
+        }
+    }
+    map<ll, set<ll>> hm;
+    fl(i,n){
+        hm[b[i]].insert(i);
+    }
+    ll right = n-1;
+    while(right>=2){
+        swap(a[0], a[right]);
+        swap_in_b(b, hm, 0, right);
+        if(a[right]!=b[right]){ll ind = *hm[a[right]].begin();
+            if(ind!=0){
+                swap_in_b(b, hm, ind, right);
+                swap(a[0], a[right-ind]);
+            }
+            else{
+                swap_in_b(b, hm, 0, right-1);
+                swap(a[0], a[right-1]);
+                swap_in_b(b,hm, right-1, right);
+                swap(a[0], a[1]);
+            }
+        }
+        right--;
+    }
+    if(a[0]==b[0] && a[1]==b[1]){
         cout<<"YES"<<endl;
     }
     else{
         cout<<"NO"<<endl;
     }
+
 }
 // Allah hu Akbar
 int main() {
