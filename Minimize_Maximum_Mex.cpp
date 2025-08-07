@@ -108,53 +108,43 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-ll func(ll i, ll h, ll x, vvll& dp, vll& cost, vll& happiness){
-    if(h<=0){
-        return 0;
-    }
-    if(i<0){
-        return 1e16;
-    }
-    if(dp[i][h]!=-1){
-        return dp[i][h];
-    }
-    
-    if(cost[i]+ func(i-1, h-happiness[i],x,  dp, cost, happiness )<=x*i){
-        dp[i][h] = min(func(i-1, h , x, dp, cost, happiness), cost[i]+ func(i-1, h-happiness[i],x,  dp, cost, happiness));
-
-    }
-    else{
-        dp[i][h] = func(i-1, h , x, dp, cost, happiness);
-    }
-    
-    return dp[i][h];
-}
 void solve() {
     ll n;
     cin>>n;
-    ll x;
-    cin>>x;
-    vll cost(n);
-    vll happiness(n);
+    vll a(n);
+    vll b(n);
     fl(i,n){
-        cin>>cost[i]>>happiness[i];
+        cin>>a[i];
     }
-    ll a = sumvec(happiness);
-    vvll dp(n, vll(a+10,-1));
-    ll mx = 0;
-    ll curr = 0;
-
-        fl(j , a+1){
-            
-            if(func(n-1,j,x,  dp, cost, happiness)<=x*(n-1)){
-                mx = max(mx, j+0LL);
-            }
+    fl(i,n){
+        cin>>b[i];
+    }
+    vector<bool> ahas(n+1);
+    vector<bool> bhas(n+1);
+    vector<bool> rep(n+1);
+    fl(i,n){
+        ahas[a[i]] = true;
+        bhas[b[i]] = true;
+        if(a[i] == b[i]){
+            rep[a[i]] = true;
         }
-        cout<<mx<<endl;
-
+    }
+    int i = 0;
+    while(i<=n && rep[i]){
+        i++;
+    }
     
+    if(!ahas[i] && !bhas[i]){
+        cout<<i<<endl;
+        return;
+    }
+    i++;
+    while(i<=n && rep[i]){
+        i++;
+    }
     
-
+    cout<<i<<endl;
+    
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

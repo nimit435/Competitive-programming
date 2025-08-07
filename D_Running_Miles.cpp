@@ -108,45 +108,35 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-ll func(vll& vec, ll l){
-    vll temp;
-    multiset<ll> s;
-    fl(i,l){
-        s.insert(vec[i]);
-    }
-    fl(i,3){
-        ll a = *s.rbegin();
-        temp.pb(a);
-        auto it = s.find(a);
-        s.erase(it);       
-    }//k-i+1=l. l+(n-l)-1
-    fl(i,3){
-        s.insert(temp[i]);
-    }
-    ll sum = sumvec(temp);
-    for(int i=1; i<=vec.size()-l; i++ ){
-        auto it = s.find(vec[i-1]);
-        s.erase(it);
-        s.insert(vec[l+i-1]);
-        temp.clear();
-        fl(i,3){
-            ll a = *s.rbegin();
-            temp.pb(a);
-            auto it = s.find(a);
-            s.erase(it);
-        }
-        fl(i,3){
-            s.insert(temp[i]);
-        }
-        sum = max(sum, sumvec(temp));
-    }
-    return sum - l-1;
-}
+
 void solve() {
     ll n;
     cin>>n;
-    
+    vll vec(n);
+    vll pref(n);
+    vll suff(n);
+    fl(i,n){
+        cin>>vec[i];
+        pref[i] = vec[i] + i;
+        suff[i] = vec[i] - i;
+    }
+    vll mxst(n);
+    vll mxen(n);
+    mxst[0] = pref[0];
+    for(int i=1; i<n; i++){
+        mxst[i] = max(mxst[i-1], pref[i]);
+    }
+    mxen[n-1] = suff[n-1];
+    for(int i=n-2; i>=0; i--){
+        mxen[i] = max(mxen[i+1], suff[i]);
+    }
+    ll mx = 0;
+    for(int i=1; i<=n-2; i++){
+        mx = max(mx, vec[i] + mxst[i-1] + mxen[i+1]);
+    }
+    cout<<mx<<endl;
 }
+
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {

@@ -108,62 +108,34 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-ll func(ll i, ll h, ll x, vvll& dp, vll& cost, vll& happiness){
-    if(h<=0){
-        return 0;
-    }
-    if(i<0){
-        return 1e16;
-    }
-    if(dp[i][h]!=-1){
-        return dp[i][h];
-    }
-    
-    if(cost[i]+ func(i-1, h-happiness[i],x,  dp, cost, happiness )<=x*i){
-        dp[i][h] = min(func(i-1, h , x, dp, cost, happiness), cost[i]+ func(i-1, h-happiness[i],x,  dp, cost, happiness));
-
-    }
-    else{
-        dp[i][h] = func(i-1, h , x, dp, cost, happiness);
-    }
-    
-    return dp[i][h];
-}
 void solve() {
     ll n;
     cin>>n;
-    ll x;
-    cin>>x;
-    vll cost(n);
-    vll happiness(n);
+    vll vec(n);
     fl(i,n){
-        cin>>cost[i]>>happiness[i];
+        cin>>vec[i];
     }
-    ll a = sumvec(happiness);
-    vvll dp(n, vll(a+10,-1));
-    ll mx = 0;
-    ll curr = 0;
-
-        fl(j , a+1){
-            
-            if(func(n-1,j,x,  dp, cost, happiness)<=x*(n-1)){
-                mx = max(mx, j+0LL);
-            }
-        }
-        cout<<mx<<endl;
-
-    
-    
-
+    vll pref(n+1);
+    vll suff(n+1);
+    for(int i=1; i<=n; i++){
+        pref[i] = gcd(pref[i-1], vec[i-1]);
+    }
+    // printvec(pref);
+    for(int i=n-1; i>=0; i--){
+        suff[i] = gcd(suff[i+1], vec[i]);
+    }
+    // printvec(suff);
+    ll lm = suff[1];
+    for(int i=1; i<n-1; i++){
+        lm = lcm(gcd(suff[i+1], pref[i]), lm);
+    }
+    lm = lcm(pref[n-1],lm);
+    cout<<lm<<endl;
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t;
-    cin >> t;
-    fl(i, t) {
-        solve();
-    }
+    solve();
     return 0;
 }
