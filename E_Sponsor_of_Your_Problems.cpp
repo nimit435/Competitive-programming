@@ -107,72 +107,54 @@ ll merge(vector<ll> &arr, ll low, ll mid, ll high) {vector<int> temp;ll left = l
 ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) return cnt;int mid = (low + high) / 2;cnt += mergeSort(arr, low, mid);cnt += mergeSort(arr, mid + 1, high);cnt += merge(arr, low, mid, high);return cnt;}
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
-//Codev
-void dijkstra(vvpll& graph, vvll& dist, vector<ll> hashorse, ll s){
-    auto cmp = [&](auto &a, auto &b){
-        return mp(dist[a.ff][a.ss],a)<mp(dist[b.ff][b.ss],b);
-    };
-    set<pair<ll,ll>, decltype(cmp)> q(cmp);
-    dist[s][0] = 0;
-    q.insert({s,0});
-    while(!q.empty()){
-        auto [v, h] = *q.begin();
-        q.erase(q.begin());
-        bool horse = (h||hashorse[v]);
-        for(auto it : graph[v]){
-            ll nd = it.ss;
-            ll nv = it.ff;
-            ll new_dist;
-            if(horse){
-                new_dist = nd / 2;
-            }
-            else{
-                new_dist = nd;
-            }
-
-            if(dist[nv][horse] > dist[v][h] + new_dist){
-                q.erase({nv, horse});
-                dist[nv][horse] = dist[v][h] + new_dist;
-                q.insert({nv, horse});
-            }
-        }
-    }
-}
+//Code
 void solve() {
-    ll n;
-    cin>>n;
-    ll m;
-    cin>>m;
-    ll h;
-    cin>>h;
-    vvpll graph(n);
-    vector<ll> hashorse(n, 0);
-    fl(i,h){
-        ll a;
-        cin>>a;
-        a--;
-        hashorse[a] = 1;
+  
+    ll l;
+    ll r;
+    cin>>l>>r;
+    string ls = to_string(l);
+    string rs = to_string(r);
+    ll n = ls.size();
+    ll pref = 0;
+    ll i =0;
+    while(i<n && ls[i]==rs[i]){
+        i++;
     }
-    fl(i,m){
-        ll u, v, w;
-        cin>>u>>v>>w;
-        u--; v--;
-        graph[u].pb(mp(v,w));
-        graph[v].pb(mp(u,w));
-    }
-    vvll dis1(n, vll(2, 1e18));
-    vvll dis2(n, vll(2, 1e18));
-    dijkstra(graph, dis1, hashorse, 0);
-    dijkstra(graph, dis2, hashorse, n-1);
-    ll best = 1e18;
-    fl(i,n){
-        best = min(best, max(min(dis1[i][0], dis1[i][1]), min(dis2[i][0], dis2[i][1])));
-    }
-    if(best==1e18){
-        cout<<-1<<endl;
+    if(i==n){
+        cout<<2*n<<endl;
         return;
     }
-    cout<<best<<endl;
+    if(ls[i]-'0'+2<=rs[i]-'0'){
+        cout<<2*i<<endl;
+        return;
+    }
+    ll sum1 = 1;
+    ll sum2 = 1;
+    ll j = i+1;
+    while(j<n && rs[j]=='0'){
+        sum1++;
+        if(ls[j]=='0'){
+            sum1++;
+        }
+        j++;
+    }
+    if(j<n && rs[j]=='1' && ls[j]=='0'){
+        sum1++;
+    }
+    j = i+1;
+    while(j<n && ls[j]=='9'){
+        sum2++;
+        if(rs[j]=='9'){
+            sum2++;
+        }
+        j++;
+    }
+    if(j<n && rs[j]=='9' && ls[j]=='8'){
+        sum2++;
+    }
+    ll ans = (2*i) + min(sum1,sum2);
+    cout<<ans<<endl;
 
 }
 // Allah hu Akbar

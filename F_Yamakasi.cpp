@@ -107,73 +107,40 @@ ll merge(vector<ll> &arr, ll low, ll mid, ll high) {vector<int> temp;ll left = l
 ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) return cnt;int mid = (low + high) / 2;cnt += mergeSort(arr, low, mid);cnt += mergeSort(arr, mid + 1, high);cnt += merge(arr, low, mid, high);return cnt;}
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
-//Codev
-void dijkstra(vvpll& graph, vvll& dist, vector<ll> hashorse, ll s){
-    auto cmp = [&](auto &a, auto &b){
-        return mp(dist[a.ff][a.ss],a)<mp(dist[b.ff][b.ss],b);
-    };
-    set<pair<ll,ll>, decltype(cmp)> q(cmp);
-    dist[s][0] = 0;
-    q.insert({s,0});
-    while(!q.empty()){
-        auto [v, h] = *q.begin();
-        q.erase(q.begin());
-        bool horse = (h||hashorse[v]);
-        for(auto it : graph[v]){
-            ll nd = it.ss;
-            ll nv = it.ff;
-            ll new_dist;
-            if(horse){
-                new_dist = nd / 2;
-            }
-            else{
-                new_dist = nd;
-            }
+//Code
 
-            if(dist[nv][horse] > dist[v][h] + new_dist){
-                q.erase({nv, horse});
-                dist[nv][horse] = dist[v][h] + new_dist;
-                q.insert({nv, horse});
-            }
-        }
-    }
-}
 void solve() {
     ll n;
     cin>>n;
-    ll m;
-    cin>>m;
-    ll h;
-    cin>>h;
-    vvpll graph(n);
-    vector<ll> hashorse(n, 0);
-    fl(i,h){
-        ll a;
-        cin>>a;
-        a--;
-        hashorse[a] = 1;
-    }
-    fl(i,m){
-        ll u, v, w;
-        cin>>u>>v>>w;
-        u--; v--;
-        graph[u].pb(mp(v,w));
-        graph[v].pb(mp(u,w));
-    }
-    vvll dis1(n, vll(2, 1e18));
-    vvll dis2(n, vll(2, 1e18));
-    dijkstra(graph, dis1, hashorse, 0);
-    dijkstra(graph, dis2, hashorse, n-1);
-    ll best = 1e18;
+    ll s;
+    cin>>s;
+    ll x;
+    cin>>x;
+    vll vec(n);
     fl(i,n){
-        best = min(best, max(min(dis1[i][0], dis1[i][1]), min(dis2[i][0], dis2[i][1])));
+        cin>>vec[i];
     }
-    if(best==1e18){
-        cout<<-1<<endl;
-        return;
+    vll pref(n+1);
+    for(int i=1; i<=n; i++){
+        pref[i] = pref[i-1]+vec[i-1];
     }
-    cout<<best<<endl;
-
+    ll lef = 0;
+    ll ans=0;
+    map<ll,ll> cnt;
+    for(int r = 0; r<n; r++){
+        if(vec[r]> x){
+            cnt.clear();
+            lef = r+1;
+        }
+        else if(vec[r] == x){
+            for(int i=lef; i<=r; i++){
+                cnt[pref[i]]++;
+            }
+            lef = r+1;
+        }
+        ans+=cnt[pref[r+1]-s];
+    }   
+    cout<<ans<<endl;
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

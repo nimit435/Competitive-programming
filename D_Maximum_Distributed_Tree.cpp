@@ -107,74 +107,78 @@ ll merge(vector<ll> &arr, ll low, ll mid, ll high) {vector<int> temp;ll left = l
 ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) return cnt;int mid = (low + high) / 2;cnt += mergeSort(arr, low, mid);cnt += mergeSort(arr, mid + 1, high);cnt += merge(arr, low, mid, high);return cnt;}
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
-//Codev
-void dijkstra(vvpll& graph, vvll& dist, vector<ll> hashorse, ll s){
-    auto cmp = [&](auto &a, auto &b){
-        return mp(dist[a.ff][a.ss],a)<mp(dist[b.ff][b.ss],b);
-    };
-    set<pair<ll,ll>, decltype(cmp)> q(cmp);
-    dist[s][0] = 0;
-    q.insert({s,0});
-    while(!q.empty()){
-        auto [v, h] = *q.begin();
-        q.erase(q.begin());
-        bool horse = (h||hashorse[v]);
-        for(auto it : graph[v]){
-            ll nd = it.ss;
-            ll nv = it.ff;
-            ll new_dist;
-            if(horse){
-                new_dist = nd / 2;
-            }
-            else{
-                new_dist = nd;
-            }
-
-            if(dist[nv][horse] > dist[v][h] + new_dist){
-                q.erase({nv, horse});
-                dist[nv][horse] = dist[v][h] + new_dist;
-                q.insert({nv, horse});
-            }
+//Code
+ll func(ll i, ll par, vvll& tree, vll& paren, vll& dec){
+    for(auto it: tree[i]){
+        if(it!=par){
+            paren[it] = i;
+            dec[i] += 1+func(it, i, tree, paren, dec);
         }
     }
+    return dec[i];
 }
 void solve() {
     ll n;
     cin>>n;
+    vvll tree(n+1);
+    vpll edges(n-1);
+    fl(i,n-1){
+        ll a, b;
+        cin>>a>>b;
+        edges[i] = mp(a,b);
+        tree[a].pb(b);
+        tree[b].pb(a);
+    }
+    vll dec(n+1);
+    vll par(n+1 , -1);
+    func(1, -1, tree, par, dec);
+    // printvec(dec);
+    ll MOD = (1e9)+7;
+    vll res;
+
+    for(auto it: edges ){
+        ll a = it.ff;
+        ll b = it.ss;
+        if(b == par[a]){
+            swap(a,b);
+        }
+        res.pb((dec[b]+1)*(n-(dec[b]+1)));
+    }
+    sort(res.rbegin(),res.rend());
     ll m;
     cin>>m;
-    ll h;
-    cin>>h;
-    vvpll graph(n);
-    vector<ll> hashorse(n, 0);
-    fl(i,h){
-        ll a;
-        cin>>a;
-        a--;
-        hashorse[a] = 1;
+    vll pri(m);
+    fl(i, m){
+        cin>>pri[i];
     }
-    fl(i,m){
-        ll u, v, w;
-        cin>>u>>v>>w;
-        u--; v--;
-        graph[u].pb(mp(v,w));
-        graph[v].pb(mp(u,w));
+    sort(pri.rbegin(),pri.rend());
+    if(m<=n-1){
+        ll ans = 0;
+        fl(i,n-1){
+            if(i<m){
+                ans = (ans+((pri[i]*res[i])%MOD))%MOD;
+            }
+            else{
+                ans = (ans+res[i])%MOD;
+            }
+        }
+        cout<<ans<<endl;
     }
-    vvll dis1(n, vll(2, 1e18));
-    vvll dis2(n, vll(2, 1e18));
-    dijkstra(graph, dis1, hashorse, 0);
-    dijkstra(graph, dis2, hashorse, n-1);
-    ll best = 1e18;
-    fl(i,n){
-        best = min(best, max(min(dis1[i][0], dis1[i][1]), min(dis2[i][0], dis2[i][1])));
+    else{
+        ll ans = 0;
+        ll temp =  1;
+        for(int i = 0; i<= m-n+1; i++){
+            temp = (temp*pri[i])%MOD;
+        }
+        ans = (temp*res[0])%MOD;
+        for(int i= 1; i<n-1; i++){
+            ans = (ans + ((pri[m-n+1+i]*res[i]))%MOD)%MOD;
+        }
+        cout<<ans<<endl;
     }
-    if(best==1e18){
-        cout<<-1<<endl;
-        return;
-    }
-    cout<<best<<endl;
-
+    // printvec(res);
 }
+
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {

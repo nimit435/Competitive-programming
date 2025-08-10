@@ -106,83 +106,148 @@ bool isPerfectSquare(ll x) { if (x >= 0) { ll sr = sqrt(x); return (sr * sr == x
 ll merge(vector<ll> &arr, ll low, ll mid, ll high) {vector<int> temp;ll left = low;ll right = mid + 1;ll cnt = 0;while (left <= mid && right <= high) {if (arr[left] <= arr[right]) {temp.push_back(arr[left]);left++;}else {temp.push_back(arr[right]);cnt += (mid - left + 1);right++;}}while (left <= mid) {temp.push_back(arr[left]);left++;}while (right <= high) {temp.push_back(arr[right]);right++;}for (int i = low; i <= high; i++) {arr[i] = temp[i - low];}return cnt;}
 ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) return cnt;int mid = (low + high) / 2;cnt += mergeSort(arr, low, mid);cnt += mergeSort(arr, mid + 1, high);cnt += merge(arr, low, mid, high);return cnt;}
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
+struct LCA {
+    vector<ll> height, euler, first, segtree;
+    vector<bool> visited;
+    int n;
 
-//Codev
-void dijkstra(vvpll& graph, vvll& dist, vector<ll> hashorse, ll s){
-    auto cmp = [&](auto &a, auto &b){
-        return mp(dist[a.ff][a.ss],a)<mp(dist[b.ff][b.ss],b);
-    };
-    set<pair<ll,ll>, decltype(cmp)> q(cmp);
-    dist[s][0] = 0;
-    q.insert({s,0});
-    while(!q.empty()){
-        auto [v, h] = *q.begin();
-        q.erase(q.begin());
-        bool horse = (h||hashorse[v]);
-        for(auto it : graph[v]){
-            ll nd = it.ss;
-            ll nv = it.ff;
-            ll new_dist;
-            if(horse){
-                new_dist = nd / 2;
-            }
-            else{
-                new_dist = nd;
-            }
+    LCA(vector<vector<ll>> &adj, int root = 0) {
+        n = adj.size();
+        height.resize(n);
+        first.resize(n);
+        euler.reserve(n * 2);
+        visited.assign(n, false);
+        dfs(adj, root);
+        int m = euler.size();
+        segtree.resize(m * 4);
+        build(1, 0, m - 1);
+    }
 
-            if(dist[nv][horse] > dist[v][h] + new_dist){
-                q.erase({nv, horse});
-                dist[nv][horse] = dist[v][h] + new_dist;
-                q.insert({nv, horse});
+    void dfs(vector<vector<ll>> &adj, ll node, ll h = 0) {
+        visited[node] = true;
+        height[node] = h;
+        first[node] = euler.size();
+        euler.push_back(node);
+        for (auto to : adj[node]) {
+            if (!visited[to]) {
+                dfs(adj, to, h + 1);
+                euler.push_back(node);
             }
         }
     }
+
+    void build(ll node, ll b, ll e) {
+        if (b == e) {
+            segtree[node] = euler[b];
+        } else {
+            ll mid = (b + e) / 2;
+            build(node << 1, b, mid);
+            build(node << 1 | 1, mid + 1, e);
+            ll l = segtree[node << 1], r = segtree[node << 1 | 1];
+            segtree[node] = (height[l] < height[r]) ? l : r;
+        }
+    }
+
+    ll query(ll node, ll b, ll e, ll L, ll R) {
+        if (b > R || e < L)
+            return -1;
+        if (b >= L && e <= R)
+            return segtree[node];
+        ll mid = (b + e) >> 1;
+
+        ll left = query(node << 1, b, mid, L, R);
+        ll right = query(node << 1 | 1, mid + 1, e, L, R);
+        if (left == -1) return right;
+        if (right == -1) return left;
+        return height[left] < height[right] ? left : right;
+    }
+
+    ll lca(ll u, ll v) {
+        ll left = first[u], right = first[v];
+        if (left > right)
+            swap(left, right);
+        return query(1, 0, euler.size() - 1, left, right);
+    }
+};
+void func(ll i, ll par, vvll& tree, vll& height , vll& depth){
+    ll mx = 0;
+    for(auto it: tree[i]){
+        if(it!=par){
+            depth[it] = 1+depth[i];
+            func(it, i, tree, height, depth);
+            mx = max(mx, 1+height[it]);
+        }
+    }
+    height[i] = mx;
 }
+//Code
 void solve() {
     ll n;
     cin>>n;
-    ll m;
-    cin>>m;
-    ll h;
-    cin>>h;
-    vvpll graph(n);
-    vector<ll> hashorse(n, 0);
-    fl(i,h){
-        ll a;
-        cin>>a;
-        a--;
-        hashorse[a] = 1;
+    vvll tree(n);
+    fl(i,n-1){
+        ll a, b;
+        cin>>a>>b;
+        a--; b--;
+        tree[a].pb(b);
+        tree[b].pb(a);
     }
-    fl(i,m){
-        ll u, v, w;
-        cin>>u>>v>>w;
-        u--; v--;
-        graph[u].pb(mp(v,w));
-        graph[v].pb(mp(u,w));
-    }
-    vvll dis1(n, vll(2, 1e18));
-    vvll dis2(n, vll(2, 1e18));
-    dijkstra(graph, dis1, hashorse, 0);
-    dijkstra(graph, dis2, hashorse, n-1);
-    ll best = 1e18;
+    LCA lc(tree);
+    vll height(n);
+    vll depth(n);
+    func(0, -1, tree, height , depth);
+    // printvec(height);
+    vll leaves;
+    
     fl(i,n){
-        best = min(best, max(min(dis1[i][0], dis1[i][1]), min(dis2[i][0], dis2[i][1])));
+        if(tree[i].size()==1){
+            leaves.pb(i);
+        }
     }
-    if(best==1e18){
-        cout<<-1<<endl;
+    // printvec(leaves);
+    ll a = leaves[0];
+    bool isodd = false;
+    for(int i=1 ; i<leaves.size(); i++){
+        ll b = leaves[i];
+        ll anc = lc.lca(a, b);
+        ll len = depth[a] + depth[b];
+        if(len%2!=0){
+            isodd = true;
+        }
+    }
+    ll ans = n-1;
+    ans -= leaves.size();
+    fl(i,n){
+        if(tree[i].size()!=1){
+            bool fl = false;
+            for(auto it: tree[i]){
+                if(tree[it].size()==1){
+                    fl = true;
+                }
+            }
+            ans+= fl;
+        }
+    }
+    if(isodd){
+        cout<<3<<" ";
+    }
+    else{
+        cout<<1<<" ";
+    }
+    if(n==3){
+        cout<<1<<endl;
         return;
     }
-    cout<<best<<endl;
-
+    if(leaves.size()==2){
+        cout<<n-1<<endl;
+        return;
+    }
+    cout<<ans<<endl;
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t;
-    cin >> t;
-    fl(i, t) {
-        solve();
-    }
+    solve();
     return 0;
 }

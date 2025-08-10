@@ -107,72 +107,160 @@ ll merge(vector<ll> &arr, ll low, ll mid, ll high) {vector<int> temp;ll left = l
 ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) return cnt;int mid = (low + high) / 2;cnt += mergeSort(arr, low, mid);cnt += mergeSort(arr, mid + 1, high);cnt += merge(arr, low, mid, high);return cnt;}
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
-//Codev
-void dijkstra(vvpll& graph, vvll& dist, vector<ll> hashorse, ll s){
-    auto cmp = [&](auto &a, auto &b){
-        return mp(dist[a.ff][a.ss],a)<mp(dist[b.ff][b.ss],b);
-    };
-    set<pair<ll,ll>, decltype(cmp)> q(cmp);
-    dist[s][0] = 0;
-    q.insert({s,0});
-    while(!q.empty()){
-        auto [v, h] = *q.begin();
-        q.erase(q.begin());
-        bool horse = (h||hashorse[v]);
-        for(auto it : graph[v]){
-            ll nd = it.ss;
-            ll nv = it.ff;
-            ll new_dist;
-            if(horse){
-                new_dist = nd / 2;
-            }
-            else{
-                new_dist = nd;
-            }
-
-            if(dist[nv][horse] > dist[v][h] + new_dist){
-                q.erase({nv, horse});
-                dist[nv][horse] = dist[v][h] + new_dist;
-                q.insert({nv, horse});
-            }
+//Code
+void func(ll i, ll par, vll& dep, vll& paren, vvll& tree){
+    for(auto it: tree[i]){
+        if(it!=par){
+            dep[it] = dep[i]+1;
+            paren[it] =  i;
+            func(it, i , dep, paren, tree);
         }
     }
 }
 void solve() {
     ll n;
     cin>>n;
-    ll m;
-    cin>>m;
-    ll h;
-    cin>>h;
-    vvpll graph(n);
-    vector<ll> hashorse(n, 0);
-    fl(i,h){
-        ll a;
-        cin>>a;
-        a--;
-        hashorse[a] = 1;
+    vvll tree(n);
+    fl(i,n-1){
+        ll a, b;
+        cin>>a>>b;
+        a--; b--;
+        tree[a].pb(b);
+        tree[b].pb(a);
     }
-    fl(i,m){
-        ll u, v, w;
-        cin>>u>>v>>w;
-        u--; v--;
-        graph[u].pb(mp(v,w));
-        graph[v].pb(mp(u,w));
-    }
-    vvll dis1(n, vll(2, 1e18));
-    vvll dis2(n, vll(2, 1e18));
-    dijkstra(graph, dis1, hashorse, 0);
-    dijkstra(graph, dis2, hashorse, n-1);
-    ll best = 1e18;
+    ll a = -1;
+    ll b = -1;
+    ll c = -1;
+    // fl(i,n){
+    //     if(tree[i].size()==1){    
+    //         if(tree[tree[i][0]].size()==2){
+    //             a = i;
+    //             b = tree[i][0];
+    //             break;
+    //         }    
+    //     }
+    // }
+    // if(a!=-1){
+    //     cout<<"YES"<<endl;
+        
+    //     vll dep(n);
+    //     vll par(n);
+    //     func(0, -1, dep,par, tree);
+    //     set<pll> s;
+    //     map<ll, vll> hm;
+    //     fl(i,n){
+    //         hm[dep[i]].pb(i);
+    //     }
+
+    //     for(auto it: hm){
+    //         if(it.ff%2==1){
+    //             for(auto node: it.ss){
+    //                 s.insert(mp(node, par[node]));
+    //                 for(auto chil: tree[node]){
+    //                     s.insert(mp(node, chil));
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     if(s.find(mp(a,b))!=s.end()){
+    //         s.erase(mp(a,b));
+    //         s.insert(mp(b,a));
+    //     }
+    //     else{
+    //         s.erase(mp(b,a));
+    //         s.insert(mp(a,b));
+    //     }
+    //     for(auto it: s){
+    //         cout<<it.ff+1<<" "<<it.ss+1<<endl;
+    //     }
+    //     return;
+    // }
     fl(i,n){
-        best = min(best, max(min(dis1[i][0], dis1[i][1]), min(dis2[i][0], dis2[i][1])));
+        if(tree[i].size()==2){
+            a = tree[i][1];
+            b = i;
+            c = tree[i][0];
+            break;
+        }
     }
-    if(best==1e18){
-        cout<<-1<<endl;
+    if(a!=-1){
+        cout<<"YES"<<endl;
+    }
+    else{
+        cout<<"NO"<<endl;
         return;
     }
-    cout<<best<<endl;
+    vll type(n,-1);
+    vector<pll> res;
+    vector<bool> vis(n,false);
+    queue<ll> q;
+    type[a] = 0;
+    vis[a] = true;
+    for(auto it: tree[a]){
+        res.pb(mp(a, it));
+        if(it!=b){
+            q.push(it);
+            type[it] = (type[a]+1)%2;
+        }
+    }
+    while(!q.empty()){
+        ll curr = q.front();
+        vis[curr] = true;
+        q.pop();
+        if(type[curr]==1){
+            for(auto it: tree[curr]){
+                if(!vis[it]){
+                    res.pb(mp(it, curr));
+                    type[it] = (type[curr]+1)%2;
+                    q.push(it);
+                }
+            }
+        }
+        else{
+            for(auto it: tree[curr]){
+                if(!vis[it]){
+                    res.pb(mp(curr, it));
+                    type[it] = (type[curr]+1)%2;
+                    q.push(it);
+                }
+            }
+        }
+    }
+    type[c] = 1;
+    vis[c] = true;
+    for(auto it: tree[c]){
+        res.pb(mp(it, c));
+        if(it!=b){
+            q.push(it);
+            type[it] = (type[c]+1)%2;
+        }
+    }
+    while(!q.empty()){
+        ll curr = q.front();
+        vis[curr] = true;
+        q.pop();
+        if(type[curr]==1){
+            for(auto it: tree[curr]){
+                if(!vis[it]){
+                    res.pb(mp(it, curr));
+                    type[it] = (type[curr]+1)%2;
+                    q.push(it);
+                }
+            }
+        }
+        else{
+            for(auto it: tree[curr]){
+                if(!vis[it]){
+                    res.pb(mp(curr, it));
+                    type[it] = (type[curr]+1)%2;
+                    q.push(it);
+                }
+            }
+        }
+    }
+    for(auto it: res){
+        cout<<it.ff+1<<" "<<it.ss+1<<endl;
+    }
 
 }
 // Allah hu Akbar
