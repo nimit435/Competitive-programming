@@ -111,54 +111,46 @@ ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 class Segtree{
     private: 
         ll size;
-        vll maxs;
+        vll tree;
     public:
-        Segtree(ll n){
-            size=1;
-            while(size<n){
-                size= size*2;
+        Segtree(vll& vec){
+            size = vec.size();
+            ll n = vec.size();
+            tree.resize(2*n);
+            copy(vec.begin(), vec.end(), tree.begin() +n);
+            for(int v = n-1; v>=1; v--){
+                tree[v] = max(tree[2*v], tree[2*v+1]);
             }
-            maxs.assign(2*size, 0LL);
         }
-        void set(ll i, ll v, ll x, ll lx, ll rx){
-            if(rx-lx==1){
-                maxs[x]=v;
-                return;
-            }
-            ll m= (lx+rx)/2;
-            if(i>=m){
-                set(i, v, 2*x+2, m, rx );
-            }
-            else{
-                set(i, v, 2*x+1, lx, m);
-            }
-            maxs[x]= max(maxs[2*x+1], maxs[2*x+2]);
-        }
-        void set(ll i, ll v){
-            set(i, v, 0, 0, size);
-        }
-        
-        ll getmax(ll l, ll r, ll x, ll lx, ll rx){
-            if(l>=rx || r<=lx){
-                // cout<<lx<<" "<<rx<<" "<<endl;
-                return 0;
-            }
-            else if(lx>= l && rx<=r){
-                return maxs[x];
-            }
-            ll m= (lx+rx)/2;
-            ll s1= getmax(l,r, 2*x+1, lx, m);
-            ll s2= getmax(l, r, 2*x+2, m, rx);
-            return max(s1,s2);
-        }
- 
         ll getmax(ll l,ll r){
-            r++;
-            return getmax(l, r, 0, 0, size);
-        }
+            l += size;
+            r += size;
+            ll ans = 0;
+            while(l<=r){
+                if(l%2==1){
+                    ans = max(ans, tree[l]);
+                    l++;
+                }
+                if(r%2==0){
+                    ans = max(ans, tree[r]);
+                    r--;
+                }
+                l /= 2;
+                r /= 2;
+            }
+            return ans;
 
+        }
+        void update(int i, int newval){
+            i+=size;
+            tree[i] = newval;
+            while(i>1){
+                i /= 2;
+                tree[i] = min(tree[2*i], tree[2*i+1]);
+            }
+        }
         void display(){
-            printvec(maxs);
+            printvec(tree);
         }
  
 };
@@ -172,10 +164,8 @@ void solve() {
         cin>>vec[i];
     }
     
-    Segtree segtree(m);
-    fl(i,m){
-        segtree.set(i,vec[i]);
-    }
+    Segtree segtree(vec);
+    
     ll q;
     cin>>q;
     vvll quer(q, vll(5));
