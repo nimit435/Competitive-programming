@@ -83,8 +83,34 @@ class Segtree{
             tree[i] = newval;
             while(i>1){
                 i /= 2;
-                tree[i] = min(tree[2*i], tree[2*i+1]);
+                tree[i] = max(tree[2*i], tree[2*i+1]);
             }
+        }
+        void update_segment(ll l , ll r, ll x){
+            l+=size;
+            r+=size;
+            while(l<=r){
+                if(l%2==1){
+                    tree[l]+=x;
+                    l++;
+                }
+                if(r%2==0){
+                    tree[r]+=x;
+                    r--;
+                }
+                l /= 2;
+                r /= 2;
+            }
+
+        }
+        ll query_value(ll i){
+            i+= size;
+            ll ans = tree[i];
+            while(i>1){
+                i /=2;
+                ans += tree[i];
+            }
+            return ans;
         }
         void display(){
             printvec(tree);
