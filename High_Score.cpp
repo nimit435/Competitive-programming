@@ -108,48 +108,72 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-ll ask(string& st){
-    cout<<"? "<<st<<endl;
-    ll ans;
-    cin>>ans;
-    return ans;
+void dfs(ll i , vector<bool>& vis, vvll& graph){
+    vis[i]= true;
+    for(auto it: graph[i]){
+        if(!vis[it]){
+            dfs(it, vis, graph);
+        }
+    }
 }
-void solve() {
+int main() {
+    Code By Solve
     ll n;
     cin>>n;
     ll m;
     cin>>m;
-    string st = "";
-    fl(j,m){
-        st+='0';
-    }
-    vpll edges;
+    vector<vector<ll>> edges(m);
+    
     fl(i,m){
-        st[i] = '1'; 
-        ll ed = ask(st);
-        edges.pb(mp(ed, i));
-        st[i] = '0';
+        ll u, v, w;
+        cin>>u>>v>>w;
+        vll temp(3);
+        temp[0] = u;
+        temp[1] = v;
+        temp[2] = -w;
+        edges[i]= temp;
     }
-    sort(edges.begin(), edges.end());
-    ll cap = 0;
-    fl(i,m){
-        ll j = edges[i].ss;
-        ll w = edges[i].ff;
-        st[j] = '1';
-        ll c = ask(st);
-        if(c != cap+w){
-            st[j] = '0';
-        }
-        else{
-            cap = c;
+    vll dist(n+1, 1e16);
+    dist[1] = 0;
+    for(int i=1; i<=n; i++){
+        for(auto it: edges){
+            ll u = it[0];
+            ll v = it[1];
+            ll w = it[2];
+            if(dist[u]!=1e16 && dist[u]+w<dist[v]){
+                dist[v] = dist[u]+w;
+            }
+            
         }
     }
-    cout<<"! "<<cap<<endl;
-}
-// Allah hu Akbar
-// 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
-int main() {
-    Code By Solve
-    solve();
+
+    set<ll> nodes;
+    for(auto it: edges){
+        ll u = it[0];
+        ll v = it[1];
+        ll w = it[2];
+        if(dist[u]!=1e16 && dist[u]+w<dist[v]){
+            nodes.insert(v);
+            dist[v] = dist[u]+w;
+        }
+    }
+    vvll graph(n+1);
+
+    for(auto it: edges){
+        graph[it[0]].pb(it[1]);
+    }
+    
+    vector<bool> vis(n+1, false);
+    for(auto it: nodes){
+        if(!vis[it]) dfs(it, vis, graph);
+        if(vis[n]){
+            cout<<-1<<endl;
+            return 0;
+        }
+    }
+    
+    cout<<-dist[n]<<endl;
+    
     return 0;
+    
 }

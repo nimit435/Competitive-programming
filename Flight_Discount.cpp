@@ -84,7 +84,7 @@ template<typename T>
 ll sumvec(vector<T> v) { ll n = v.size(); ll s = 0; fl(i, n) s += v[i]; return s; }
 
 // Mathematical functions
-ll gcd(ll a, ll b) { if (b == 0) return a; return gcd(b, a % b); } //__gcd
+ll gcd(ll a, ll b) { if (b == 0)  return a; return gcd(b, a % b); } //__gcd
 ll lcm(ll a, ll b) { return (a / gcd(a, b) * b); }
 ll moduloMultiplication(ll a, ll b, ll mod) { ll res = 0; a %= mod; while (b) { if (b & 1) res = (res + a) % mod; b >>= 1; } return res; }
 ll powermod(ll x, ll y, ll p) { ll res = 1; x = x % p; if (x == 0) return 0; while (y > 0) { if (y & 1) res = (res * x) % p; y = y >> 1; x = (x * x) % p; } return res; }
@@ -108,43 +108,58 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-ll ask(string& st){
-    cout<<"? "<<st<<endl;
-    ll ans;
-    cin>>ans;
-    return ans;
+void dijkstra(ll s, vvpll& graph, vvll& dist){
+    auto cmp = [&](auto& a, auto& b){
+        return mp(dist[a.ff][a.ss], a)<mp(dist[b.ff][b.ss], b);
+    };
+    set<pll, decltype(cmp)> q(cmp);
+    dist[s][0] = 0;
+    q.insert(mp(s,0));
+    while(!q.empty()){
+        pll a = *q.begin();
+        q.erase(q.begin());
+        ll v = a.ff;
+        ll c_used = a.ss;
+        ll dis = dist[v][c_used];
+        for(auto it: graph[v]){
+            if(c_used == 0){
+                if(dist[it.ff][1]>dis + (it.ss/2)){
+                    q.erase(mp(it.ff,1));
+                    dist[it.ff][1] = dis + (it.ss/2);
+                    q.insert(mp(it.ff, 1));
+                }
+                if(dist[it.ff][0]>dis + (it.ss)){
+                    q.erase(mp(it.ff,0));
+                    dist[it.ff][0] = dis + (it.ss);
+                    q.insert(mp(it.ff, 0));
+                }
+            }
+            else{
+                if(dist[it.ff][1]>dis + (it.ss)){
+                    q.erase(mp(it.ff,1));
+                    dist[it.ff][1] = dis + (it.ss);
+                    q.insert(mp(it.ff, 1));
+                }
+            }
+        }
+    }
 }
 void solve() {
     ll n;
     cin>>n;
     ll m;
     cin>>m;
-    string st = "";
-    fl(j,m){
-        st+='0';
-    }
-    vpll edges;
+    vvpll graph(n+1);
     fl(i,m){
-        st[i] = '1'; 
-        ll ed = ask(st);
-        edges.pb(mp(ed, i));
-        st[i] = '0';
+        ll u, v, w;
+        cin>>u>>v>>w;
+        graph[u].pb(mp(v,w));
     }
-    sort(edges.begin(), edges.end());
-    ll cap = 0;
-    fl(i,m){
-        ll j = edges[i].ss;
-        ll w = edges[i].ff;
-        st[j] = '1';
-        ll c = ask(st);
-        if(c != cap+w){
-            st[j] = '0';
-        }
-        else{
-            cap = c;
-        }
-    }
-    cout<<"! "<<cap<<endl;
+    vvll dist(n+1, vll(2, 1e16));
+    dist[1][0] = 0;
+    dijkstra(1, graph, dist);
+    cout<<min(dist[n][1], dist[n][0])<<endl;
+    
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
