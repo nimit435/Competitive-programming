@@ -108,18 +108,78 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
+ll MOD = (1e9)+7;
+void dfs(ll i, vector<bool>& vis, vvpll& graph){
+    vis[i] = true;
+    for(auto it: graph[i]){
+        if(!vis[it.ff]){
+            dfs(it.ff, vis, graph);
+        }
+    }
+}
+ll func(ll i, vll& dp, vvpll& back_edge, vll& dist, vector<bool>& vis){
+    if(i==1){
+        dp[1] = 1;
+        return 1;
+    }
+    if(dp[i]!=-1){
+        return dp[i];
+    }
+    ll res = 0;
+    for(auto it: back_edge[i]){
+        if(vis[1] && dist[it.ff]+it.ss==dist[i]){
+            res = (res+func(it.ff, dp, back_edge, dist, vis))%MOD;
+        }
+    }
+    dp[i] = res;
+    return res;
+}
+ll func2(ll i, vll& dp, vvpll& back_edge, vll& dist, vector<bool>& vis){
+    if(i==1){
+        dp[1] = 0;
+        return 0;
+    }
+    if(dp[i]!=-1){
+        return dp[i];
+    }
+    ll res = 1e16;
+    for(auto it: back_edge[i]){
+        if(vis[1] && dist[it.ff]+it.ss==dist[i]){
+            res = min(res,func2(it.ff, dp, back_edge, dist, vis)+1);
+        }
+    }
+    dp[i] = res;
+    return res;
+}
+ll func3(ll i, vll& dp, vvpll& back_edge, vll& dist, vector<bool>& vis){
+    if(i==1){
+        dp[1] = 0;
+        return 0;
+    }
+    if(dp[i]!=-1){
+        return dp[i];
+    }
+    ll res = 0;
+    for(auto it: back_edge[i]){
+        if(vis[1] && dist[it.ff]+it.ss==dist[i]){
+            res = max(res,func3(it.ff, dp, back_edge, dist, vis)+1);
+        }
+    }
+    dp[i] = res;
+    return res;
+}
 void solve() {
     ll n;
     cin>>n;
     ll m;
     cin>>m; 
     vvpll graph(n+1);
-    vvll back_edge(n+1);
+    vvpll back_edge(n+1);
     fl(i,m){
         ll u, v, w;
         cin>>u>>v>>w;
         graph[u].pb({v,w});
-        back_edge[v].pb(u);
+        back_edge[v].pb({u,w});
     }
     priority_queue<pll, vpll, greater<pll> > pq;
     pq.push({0 , 1});
@@ -138,7 +198,19 @@ void solve() {
             }
         }
     }
-    cout<<dist[n]<<endl;
+
+    cout<<dist[n]<<" ";
+    vll dp(n+1, -1);
+    vll mndp(n+1, -1);
+    vll mxdp(n+1, -1);
+
+    vector<bool> vis(n+1, false);
+    dfs(1, vis, graph);
+    cout<<func(n, dp, back_edge, dist, vis)<<" ";
+    cout<<func2(n, mndp, back_edge, dist, vis)<<" ";
+    cout<<func3(n, mxdp, back_edge, dist, vis)<<endl;
+
+
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
