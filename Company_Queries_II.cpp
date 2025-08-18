@@ -108,35 +108,88 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-
-ll numchil(ll i, ll par, vvll& tree, vll& chil){
-    ll res = 0;
+const ll MX = (2e5)+5;
+ll depth[MX];
+ll par[MX];
+ll dp[MX][32];
+vector<ll> tree[MX];
+void dfs(ll i, ll par){
     for(auto it: tree[i]){
         if(it!=par){
-            res += 1+numchil(it, i, tree, chil);
+            depth[it] = depth[i]+1;
+            dfs(it, i);
         }
     }
-    chil[i] = res;
-    return res;
 }
 void solve() {
     ll n;
     cin>>n;
-    vvll tree(n);
+    ll q;
+    cin>>q;
+    // vll par(n);
+    // vvll tree(n);
+    memset(depth, 0, sizeof(depth));
+    memset(par, 0, sizeof(par));
+
+
     for(int i=1; i<n; i++){
-        ll u;
-        cin>>u;
-        u--;
-        tree[i].pb(u);
-        tree[u].pb(i);
+        cin>>par[i];
+        par[i]--;
+        tree[i].pb(par[i]);
+        tree[par[i]].pb(i);
     }
+    dfs(0, -1);
+    // printvec(par);
+    ll mx = ceil(log2(n));
 
-    // printvec(tree);
-    vll chil(n);
+    dp[0][0] = 0;
+    for(int i = 1; i<n; i++){
+        dp[i][0] = par[i];
+    }
+    for(int j= 1; j<=mx; j++){
+        for(int i=0; i<n; i++){
+            dp[i][j] = dp[dp[i][j-1]][j-1];
+        }
+    }
+    // printvec(dp[3]);
 
-    numchil(0, -1, tree, chil);
-    printvec(chil);
+    auto jump = [&](ll u, ll dis){
+        for(int j=0; j<=mx; j++){
+            if((dis&(1LL<<j))!=0){
+                u = dp[u][j];
+            }
+        }
+        return u;
+    };
+    while(q--){
+        ll u, v;
 
+        cin>>u>>v;
+        if(u==v){
+            cout<<u<<endl;
+            continue;
+        }
+        // cout<<jum<<" ";
+        u--; v--;
+        
+        if(depth[u]>depth[v]){
+            swap(u,v);
+        }
+        ll diff = depth[v]-depth[u];
+        v = jump(v, diff);
+        if(u==v){
+            cout<<u+1<<endl;
+            continue;
+        }
+        for(int j = mx; j>=0; j--){
+            if(dp[u][j]!= dp[v][j]){
+                u = dp[u][j];
+                v = dp[v][j];
+            }
+        }
+        cout<<dp[u][0]+1<<endl;
+
+    }
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

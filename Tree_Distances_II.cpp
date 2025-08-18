@@ -108,12 +108,21 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-
-ll numchil(ll i, ll par, vvll& tree, vll& chil){
+void dfs(ll i, ll par, vvll& tree, vll& depth, vll& parent){
+    for(auto it: tree[i]){
+        if(it!=par){
+            parent[it] = i;
+            depth[it] = depth[i]+1;
+            dfs(it, i, tree, depth, parent);
+        }
+    }
+}
+ll numchil(ll i, ll par, vvll& tree, vll& chil, vvll& children){
     ll res = 0;
     for(auto it: tree[i]){
         if(it!=par){
-            res += 1+numchil(it, i, tree, chil);
+            children[i].pb(it);
+            res += 1+numchil(it, i, tree, chil, children);
         }
     }
     chil[i] = res;
@@ -123,20 +132,37 @@ void solve() {
     ll n;
     cin>>n;
     vvll tree(n);
-    for(int i=1; i<n; i++){
-        ll u;
-        cin>>u;
-        u--;
-        tree[i].pb(u);
-        tree[u].pb(i);
+    fl(i,n-1){
+        ll u, v;
+        cin>>u>>v;
+        u--;v--;
+        tree[u].pb(v);
+        tree[v].pb(u);
     }
+    vll depth(n);
+    vll par(n);
 
-    // printvec(tree);
+    dfs(0, -1, tree, depth, par);
+    ll sum = sumvec(depth);
+    vll res(n);
     vll chil(n);
-
-    numchil(0, -1, tree, chil);
-    printvec(chil);
-
+    vvll children(n);
+    numchil(0, -1, tree, chil, children);
+    // printvec(children);
+    res[0] = sum;
+    queue<ll> q;
+    for(auto it: children[0]){
+        q.push(it);
+    }
+    while(!q.empty()){
+        ll a = q.front();
+        q.pop();
+        res[a] = res[par[a]] - (2*(chil[a]+1)) + n;
+        for(auto it: children[a]){
+            q.push(it);
+        }
+    }
+    printvec(res);
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

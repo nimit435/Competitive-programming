@@ -108,35 +108,11 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-
-ll numchil(ll i, ll par, vvll& tree, vll& chil){
-    ll res = 0;
-    for(auto it: tree[i]){
-        if(it!=par){
-            res += 1+numchil(it, i, tree, chil);
-        }
-    }
-    chil[i] = res;
-    return res;
-}
 void solve() {
     ll n;
     cin>>n;
-    vvll tree(n);
-    for(int i=1; i<n; i++){
-        ll u;
-        cin>>u;
-        u--;
-        tree[i].pb(u);
-        tree[u].pb(i);
-    }
-
-    // printvec(tree);
-    vll chil(n);
-
-    numchil(0, -1, tree, chil);
-    printvec(chil);
-
+    
+    
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

@@ -108,35 +108,63 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-
-ll numchil(ll i, ll par, vvll& tree, vll& chil){
-    ll res = 0;
+void dfs(ll i, ll par, vvll& tree, vll& depth){
     for(auto it: tree[i]){
         if(it!=par){
-            res += 1+numchil(it, i, tree, chil);
+            depth[it] = depth[i]+1;
+            dfs(it, i, tree, depth);
         }
     }
-    chil[i] = res;
-    return res;
 }
 void solve() {
     ll n;
     cin>>n;
+    ll q;
+    cin>>q;
+    vll par(n);
     vvll tree(n);
+    par[0] = 0;
     for(int i=1; i<n; i++){
-        ll u;
-        cin>>u;
-        u--;
-        tree[i].pb(u);
-        tree[u].pb(i);
+        cin>>par[i];
+        par[i]--;
+        tree[i].pb(par[i]);
+        tree[par[i]].pb(i);
     }
+    vll depth(n);
+    dfs(0, -1, tree, depth);
+    // printvec(par);
+    vvll dp(n, vll(32, 0));
+    dp[0][0] = 0;
+    for(int i = 1; i<n; i++){
+        dp[i][0] = par[i];
+    }
+    for(int j= 1; j<=31; j++){
+        for(int i=0; i<n; i++){
+            dp[i][j] = dp[dp[i][j-1]][j-1];
+        }
+    }
+    // printvec(dp[3]);
 
-    // printvec(tree);
-    vll chil(n);
+    auto jump = [&](ll u, ll dis){
+        for(int j=0; j<=31; j++){
+            if((dis&(1LL<<j))!=0){
+                u = dp[u][j];
+            }
+        }
+        return u;
+    };
+    while(q--){
+        ll u, jum;
 
-    numchil(0, -1, tree, chil);
-    printvec(chil);
-
+        cin>>u>>jum;
+        // cout<<jum<<" ";
+        u--;
+        if(jum>depth[u]){
+            cout<<-1<<endl;
+            continue;
+        }
+        cout<<jump(u, jum)+1<<endl;
+    }
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
