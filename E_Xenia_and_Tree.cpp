@@ -108,118 +108,160 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-const ll MX = (2e5)+5;
-ll depth[MX];
-ll parent[MX];
-ll dp[MX][32];
-vector<ll> tree[MX];
-void dfs(ll i, ll par){
+ll dfs(ll i, ll par, vll& chil, vvll& tree, vector<bool>& vis){
+    if(vis[i]){
+        return 0;
+    }
+    chil[i] = 1;
     for(auto it: tree[i]){
-        if(it!=par){
-            parent[it] = i;
-            depth[it] = depth[i]+1;
-            dfs(it, i);
+        if(it== par){
+            continue;
+        }
+
+        chil[i] += dfs(it, i, chil, tree, vis);
+    }
+    return chil[i];
+}
+void dfsb(ll i, ll par,  vvll& tree, vll& depth, vll& parentb){
+
+    for(auto it: tree[i]){
+
+        if(it== par){
+            continue;
+        }
+        parentb[it] = i;
+        depth[it] = depth[i]+1;
+        dfsb(it, i,  tree, depth, parentb);
+    }
+
+}
+
+ll  find_centroid(ll i, ll par, vll& chil, vector<bool>& vis, vvll& tree, ll n ){
+    for(auto it: tree[i]){
+        if(it == par){
+            continue;
+        }
+        if(!vis[it] && chil[it]*2>n){
+            return find_centroid(it, i, chil,vis, tree, n);
+        }
+    }
+    return i;
+}
+
+ll jump(ll u, ll dis, vvll& dp){
+    for(int j=0; j<=31; j++){
+        if((dis&(1LL<<j))!=0){
+            u = dp[u][j];
+        }
+    }
+    return u;
+}
+ll dist(ll u, ll v, vvll& dp, vvll& tree, vll& depth){
+
+    if(u==v){
+        return 0;
+    }
+ 
+    ll ou = u;
+    ll ov = v;
+    if(depth[u]>depth[v]){
+        swap(u,v);
+    }
+    ll diff = depth[v]-depth[u];
+    v = jump(v, diff, dp);
+    ll c;
+    if(u==v){
+        c = u;
+    }
+    else{
+        for(int j = 31; j>=0; j--){
+            if(dp[u][j]!= dp[v][j]){
+                u = dp[u][j];
+                v = dp[v][j];
+            }
+        }
+        c = dp[u][0];
+    }
+    
+    return depth[ou]+depth[ov] - (2*depth[c]);
+}
+void init_centroid(ll i, ll par, vll& chil, vector<bool>& vis, vvll& tree, vll& parent){
+    dfs(i, -1, chil, tree, vis);
+    ll c = find_centroid(i, -1, chil, vis, tree, chil[i]);
+    vis[c] = true; 
+    parent[c] = par;
+    for(auto it: tree[c]){
+        if(!vis[it]){
+            init_centroid(it, c, chil , vis, tree, parent);
         }
     }
 }
-void dfsb(ll i, ll par,  vll& pref){
-    for(auto it: tree[i]){
-        if(it!= par){
-            dfsb(it, i,  pref);
-            pref[i] += pref[it];
-        }
-    }
-}
+
 void solve() {
     ll n;
     cin>>n;
-    ll m;
-    cin>>m;
-    // vll par(n);
-    // vvll tree(n);
-    memset(depth, 0, sizeof(depth));
-    memset(parent, 0, sizeof(parent));
-
-
-    for(int i=1; i<n; i++){
+    ll q;
+    cin>>q;
+    vvll tree(n);
+    fl(i,n-1){
         ll u, v;
         cin>>u>>v;
         u--; v--;
         tree[u].pb(v);
         tree[v].pb(u);
     }
-    dfs(0, -1);
-    // printvec(par);
-    ll mx = ceil(log2(n));
+    vll depth(n,0);
+    vector<bool> vis(n, false);
+    vll chil(n, 0);
+    vll parent(n);
+    init_centroid(0, -1, chil , vis, tree, parent);
+    // printvec(parent);
+    vll parentb(n, 0);
 
-    dp[0][0] = 0;
-    for(int i = 1; i<n; i++){
-        dp[i][0] = parent[i];
+    dfsb(0, -1, tree, depth , parentb);
+    vll best(n , 1e16);
+    vvll dp(n, vll(32));
+    fl(i,n){
+        dp[i][0] = parentb[i];
     }
-    for(int j= 1; j<=mx; j++){
-        for(int i=0; i<n; i++){
+    // printvec(parentb);
+
+    for(int j =1; j<=31; j++){
+        fl(i,n){
             dp[i][j] = dp[dp[i][j-1]][j-1];
         }
     }
-    // printvec(dp[3]);
-
-    auto jump = [&](ll u, ll dis){
-        for(int j=0; j<=mx; j++){
-            if((dis&(1LL<<j))!=0){
-                u = dp[u][j];
-            }
+    auto update = [&](ll v){
+        best[v] = 0;
+        ll u = v;
+        while(parent[u]!=-1){
+            u = parent[u];
+            best[u] = min(best[u], dist(u, v, dp, tree, depth));
         }
-        return u;
     };
-    auto lca = [&](ll u, ll v){
-        u--; v--;
-
-        if(u==v){
-            
-            return u;
+    auto query = [&](ll v){
+        ll res = best[v];
+        ll u = v;
+        while(parent[u]!=-1){
+            u = parent[u];
+            res = min(res, best[u] + dist(u, v, dp , tree, depth));
         }
-        ll ou = u;
-        ll ov = v;
-        if(depth[u]>depth[v]){
-            swap(u,v);
-        }
-        ll diff = depth[v]-depth[u];
-        v = jump(v, diff);
-        ll c;
-        if(u==v){
-            c = u;
+        return res;
+    };
+    update(0);
+    // printvec(best);
+    while(q--){
+        ll op, v;
+        cin>>op>>v;
+        v--;
+        if(op==1){
+            update(v);
         }
         else{
-            for(int j = mx; j>=0; j--){
-                if(dp[u][j]!= dp[v][j]){
-                    u = dp[u][j];
-                    v = dp[v][j];
-                }
-            }
-            c = dp[u][0];
+            cout<<query(v)<<endl;
         }
-        return c;
-
-    };
-    vll pref(n,0);
-    while(m--){
-        ll u, v;
-
-        cin>>u>>v;
-        ll c = lca(u,v);
-        // cout<<u<<endl;
-    
-        pref[c] --;
-        if(c!=0){
-            pref[parent[c]]--;
-        }
-        pref[u-1]++;
-        pref[v-1]++;
     }
-
-    dfsb(0, -1, pref);
-    printvec(pref);
-
+    
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

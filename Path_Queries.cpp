@@ -108,119 +108,146 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-const ll MX = (2e5)+5;
-ll depth[MX];
-ll parent[MX];
-ll dp[MX][32];
-vector<ll> tree[MX];
-void dfs(ll i, ll par){
+ll dfs(ll i, ll par,vvll& tree, vll& tre, vll& pathsum, vll& val, vll& chil){
+    tre.pb(i);
+    ll re = 1;
     for(auto it: tree[i]){
-        if(it!=par){
-            parent[it] = i;
-            depth[it] = depth[i]+1;
-            dfs(it, i);
+        if(it==par){
+            continue;
         }
+        pathsum[it] = pathsum[i] + val[it];
+
+        re += dfs(it, i, tree, tre, pathsum, val, chil);
     }
+    chil[i] = re;
+    return chil[i];
 }
-void dfsb(ll i, ll par,  vll& pref){
-    for(auto it: tree[i]){
-        if(it!= par){
-            dfsb(it, i,  pref);
-            pref[i] += pref[it];
+class Segtree{
+    private: 
+        long long size;
+        vector<long long> tree;
+    public:
+        Segtree(vll& vec){
+            size = vec.size();
+            ll n = vec.size();
+            tree.resize(2*n);
+            copy(vec.begin(), vec.end(), tree.begin() +n);
+            for(int v = n-1; v>=1; v--){
+                tree[v] = tree[2*v]+tree[2*v+1];
+            }
         }
-    }
-}
+        // ll getmax(ll l,ll r){
+        //     l += size;
+        //     r += size;
+        //     ll ans = 0;
+        //     while(l<=r){
+        //         if(l%2==1){
+        //             ans = ans+ tree[l];
+        //             l++;
+        //         }
+        //         if(r%2==0){
+        //             ans = ans+ tree[r];
+        //             r--;
+        //         }
+        //         l /= 2;
+        //         r /= 2;
+        //     }
+        //     return ans;
+
+        // }
+        // void update(int i, int newval){
+        //     i+=size;
+        //     tree[i] = newval;
+        //     while(i>1){
+        //         i /= 2;
+        //         tree[i] =tree[2*i]+ tree[2*i+1];
+        //     }
+        // }
+        void update_segment(ll l , ll r, ll x){
+            l+=size;
+            r+=size;
+            while(l<=r){
+                if(l%2==1){
+                    tree[l]+=x;
+                    l++;
+                }
+                if(r%2==0){
+                    tree[r]+=x;
+                    r--;
+                }
+                l /= 2;
+                r /= 2;
+            }
+
+        }
+        ll query_value(ll i){
+            i+= size;
+            ll ans = tree[i];
+            while(i>1){
+                i /=2;
+                ans += tree[i];
+            }
+            return ans;
+        }
+        void display(){
+            printvec(tree);
+        }
+ 
+};
 void solve() {
     ll n;
     cin>>n;
-    ll m;
-    cin>>m;
-    // vll par(n);
-    // vvll tree(n);
-    memset(depth, 0, sizeof(depth));
-    memset(parent, 0, sizeof(parent));
-
-
-    for(int i=1; i<n; i++){
-        ll u, v;
+    ll q;
+    cin>>q;
+    vll val(n);
+    fl(i,n){
+        cin>>val[i];
+    }
+    vvll tree(n);
+    fl(i,n-1){
+        ll u,v;
         cin>>u>>v;
         u--; v--;
         tree[u].pb(v);
         tree[v].pb(u);
     }
-    dfs(0, -1);
-    // printvec(par);
-    ll mx = ceil(log2(n));
-
-    dp[0][0] = 0;
-    for(int i = 1; i<n; i++){
-        dp[i][0] = parent[i];
+    vll tre;
+    vll pathsum(n);
+    vll chil(n);
+    pathsum[0] = val[0];
+    dfs(0, -1, tree, tre, pathsum, val, chil);
+    // printvec(pathsum);
+    vll ind(n);
+    Segtree tr(ind);
+    fl(i,n){
+        ind[tre[i]] = i;
     }
-    for(int j= 1; j<=mx; j++){
-        for(int i=0; i<n; i++){
-            dp[i][j] = dp[dp[i][j-1]][j-1];
-        }
+    fl(i,n){
+        tr.update_segment(ind[tre[i]], ind[tre[i]], pathsum[tre[i]]);
     }
-    // printvec(dp[3]);
-
-    auto jump = [&](ll u, ll dis){
-        for(int j=0; j<=mx; j++){
-            if((dis&(1LL<<j))!=0){
-                u = dp[u][j];
-            }
-        }
-        return u;
-    };
-    auto lca = [&](ll u, ll v){
-        u--; v--;
-
-        if(u==v){
-            
-            return u;
-        }
-        ll ou = u;
-        ll ov = v;
-        if(depth[u]>depth[v]){
-            swap(u,v);
-        }
-        ll diff = depth[v]-depth[u];
-        v = jump(v, diff);
-        ll c;
-        if(u==v){
-            c = u;
+    while(q--){
+        ll op;
+        cin>>op;
+        if(op == 1){
+            ll node, x;
+            cin>>node>>x;
+            node--;
+            ll prev = val[node];
+            ll change = x-prev;
+            val[node] = x;
+            ll l = ind[node];
+            ll r = l + chil[node] -1;
+            tr.update_segment(l, r, change);
         }
         else{
-            for(int j = mx; j>=0; j--){
-                if(dp[u][j]!= dp[v][j]){
-                    u = dp[u][j];
-                    v = dp[v][j];
-                }
-            }
-            c = dp[u][0];
+            ll node;
+            cin>>node;
+            node--;
+            cout<<tr.query_value(ind[node])<<endl;
         }
-        return c;
-
-    };
-    vll pref(n,0);
-    while(m--){
-        ll u, v;
-
-        cin>>u>>v;
-        ll c = lca(u,v);
-        // cout<<u<<endl;
-    
-        pref[c] --;
-        if(c!=0){
-            pref[parent[c]]--;
-        }
-        pref[u-1]++;
-        pref[v-1]++;
     }
-
-    dfsb(0, -1, pref);
-    printvec(pref);
-
 }
+
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {

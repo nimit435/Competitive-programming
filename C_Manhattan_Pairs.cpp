@@ -108,123 +108,113 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-const ll MX = (2e5)+5;
-ll depth[MX];
-ll parent[MX];
-ll dp[MX][32];
-vector<ll> tree[MX];
-void dfs(ll i, ll par){
-    for(auto it: tree[i]){
-        if(it!=par){
-            parent[it] = i;
-            depth[it] = depth[i]+1;
-            dfs(it, i);
+ll count_int(multiset<pair<pll,ll>>& s1, multiset<pair<pll,ll>>& s2){
+    ll count = 0;
+    auto it1 = s1.begin();
+    auto it2 = s2.begin();
+    while (it1 != s1.end() && it2 != s2.end()) {
+        if (*it1 < *it2) {
+            ++it1;
+        } else if (*it2 < *it1) {
+            ++it2;
+        } else {
+            // intersection element
+            ++count;
+            ++it1;
+            ++it2;
         }
     }
-}
-void dfsb(ll i, ll par,  vll& pref){
-    for(auto it: tree[i]){
-        if(it!= par){
-            dfsb(it, i,  pref);
-            pref[i] += pref[it];
-        }
-    }
+    return count;
 }
 void solve() {
     ll n;
     cin>>n;
-    ll m;
-    cin>>m;
-    // vll par(n);
-    // vvll tree(n);
-    memset(depth, 0, sizeof(depth));
-    memset(parent, 0, sizeof(parent));
-
-
-    for(int i=1; i<n; i++){
-        ll u, v;
-        cin>>u>>v;
-        u--; v--;
-        tree[u].pb(v);
-        tree[v].pb(u);
+    vector<pair<pll, ll>> vec(n);
+    vector<pair<pll, ll>> vecb(n);
+    fl(i,n){
+        cin>>vec[i].ff.ff>>vec[i].ff.ss;
+        vec[i].ss = i;
+        vecb[i] = vec[i];
     }
-    dfs(0, -1);
-    // printvec(par);
-    ll mx = ceil(log2(n));
-
-    dp[0][0] = 0;
-    for(int i = 1; i<n; i++){
-        dp[i][0] = parent[i];
-    }
-    for(int j= 1; j<=mx; j++){
-        for(int i=0; i<n; i++){
-            dp[i][j] = dp[dp[i][j-1]][j-1];
-        }
-    }
-    // printvec(dp[3]);
-
-    auto jump = [&](ll u, ll dis){
-        for(int j=0; j<=mx; j++){
-            if((dis&(1LL<<j))!=0){
-                u = dp[u][j];
-            }
-        }
-        return u;
+    // map<pll,set<ll>> hm;
+    // fl(i,n){
+    //     hm[vec[i]].insert(i);
+    // }
+    auto cmpb = [&](pair<pll,ll>& a, pair<pll,ll>& b){
+        return a.ff.ss<b.ff.ss;
     };
-    auto lca = [&](ll u, ll v){
-        u--; v--;
-
-        if(u==v){
-            
-            return u;
-        }
-        ll ou = u;
-        ll ov = v;
-        if(depth[u]>depth[v]){
-            swap(u,v);
-        }
-        ll diff = depth[v]-depth[u];
-        v = jump(v, diff);
-        ll c;
-        if(u==v){
-            c = u;
-        }
-        else{
-            for(int j = mx; j>=0; j--){
-                if(dp[u][j]!= dp[v][j]){
-                    u = dp[u][j];
-                    v = dp[v][j];
-                }
-            }
-            c = dp[u][0];
-        }
-        return c;
-
+    auto cmpa = [&](pair<pll,ll>& a, pair<pll,ll>& b){
+        return a.ff.ff<b.ff.ff;
     };
-    vll pref(n,0);
-    while(m--){
-        ll u, v;
+    sort(vec.begin(), vec.end(), cmpa);
 
-        cin>>u>>v;
-        ll c = lca(u,v);
-        // cout<<u<<endl;
+    sort(vecb.begin(), vecb.end(), cmpb);
+    multiset<pair<pll,ll>> xl;
+    multiset<pair<pll,ll>> xr;
+    multiset<pair<pll,ll>> yl;
+    multiset<pair<pll,ll>> yr;
+
+    for(int i=0; i<n/2; i++){
+        xl.insert(vec[i]);
+        yl.insert(vecb[i]);
+        xr.insert(vec[i+(n/2)]);
+        yr.insert(vecb[i+(n/2)]);
+    }
+    // for(auto it: xl){
+    //     cout<<it<<" ";
+    // }
+    // cout<<endl;
+    // for(auto it: xr){
+    //     cout<<it<<" ";
+    // }
+    // cout<<endl;
+    // for(auto it: yl){
+    //     cout<<it<<" ";
+    // }
+    // cout<<endl;
+    // for(auto it: yr){
+    //     cout<<it<<" ";
+    // }
+    // cout<<endl;
+    ll cntrr = count_int(xr, yr);
+    ll cntll = count_int(xl, yl);
+    ll cntrl = count_int(xr, yl);
+    ll cntlr = count_int(xl, yr);
+    vector<pair<pll,ll>> xryr(cntrr);
+    vector<pair<pll,ll>> xryl(cntrl);
+    vector<pair<pll,ll>> xlyr(cntlr);
+    vector<pair<pll,ll>> xlyl(cntll);
+
+    set_intersection(xr.begin(), xr.end(), yr.begin(), yr.end(), xryr.begin());
+    set_intersection(xr.begin(), xr.end(), yl.begin(), yl.end(), xryl.begin());
+    set_intersection(xl.begin(), xl.end(), yr.begin(), yr.end(), xlyr.begin());
+    set_intersection(xl.begin(), xl.end(), yl.begin(), yl.end(), xlyl.begin());
+
+   
+
+    ll k = 0;
+    fl(i,xlyl.size()){
+        pair<pll,ll> a = xlyl[i];
+        pair<pll,ll> b = xryr[i];
+        cout<<a.ss+1<<" "<<b.ss+1<<endl;
+
+    }
+    fl(i,xlyr.size()){
+        pair<pll,ll> a = xlyr[i];
+        pair<pll,ll> b = xryl[i];
+        cout<<a.ss+1<<" "<<b.ss+1<<endl;
+
+    }
     
-        pref[c] --;
-        if(c!=0){
-            pref[parent[c]]--;
-        }
-        pref[u-1]++;
-        pref[v-1]++;
-    }
-
-    dfsb(0, -1, pref);
-    printvec(pref);
-
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    solve();
+    ll t;
+    cin >> t;
+    fl(i, t) {
+        solve();
+    }
     return 0;
 }
