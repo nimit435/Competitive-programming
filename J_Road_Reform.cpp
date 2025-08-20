@@ -167,7 +167,7 @@ struct pair_hash {
         return h1 ^ (h2 << 1); 
     }
 };
-void solve(bool fl) {
+void solve() {
     ll n;
     cin>>n;
     ll m;
@@ -241,12 +241,10 @@ void solve(bool fl) {
         res = fixed2;
     }
 
-    if(fl){
-        cout<<fixed<<fixed2<<res<<endl;
-    }
-    else{
-        cout<<res<<endl;
-    }
+    
+    // else{
+    cout<<res<<endl;
+    // }
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
@@ -254,20 +252,8 @@ int main() {
     Code By Solve
     ll t;
     cin >> t;
-    if(t==500){
-        fl(i,t){
-            if(i==91){
-                solve(false);
-            }
-            else{
-                solve(false);
-            }
-        }
-    }
-    else{
-        fl(i, t) {
-            solve(false);
-        }
+    fl(i,t){
+        solve();
     }
     
     return 0;
