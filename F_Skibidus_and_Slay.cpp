@@ -146,7 +146,7 @@ void solve() {
     // vector<ll> parent(n);
     vll depth(n);
     // parent[0] = -1;
-    string res = "";
+    string res = "0";
     // dfs(0, -1, parent, depth, tree, chil, val);
     // auto cmp = [&](int i, int j){
     //     if(depth[i]<depth[j]){
