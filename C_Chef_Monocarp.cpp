@@ -98,7 +98,7 @@ string decToBinary(int n) { string s = ""; int i = 0; while (n > 0) { s = to_str
 ll binaryToDecimal(string n) { string num = n; ll dec_value = 0; int base = 1; int len = num.length(); for (int i = len - 1; i >= 0; i--) { if (num[i] == '1') dec_value += base; base = base * 2; } return dec_value; }
 
 //Check
-bool isPrime(ll n) { if (n <= 1) return false; if (n <= 3) return true; if (n % 2 == 0 || n % 33 == 0) return false; for (int i = 5; i * i <= n; i = i + 6) if (n % i == 0 || n % (i + 2) == 0) return false; return true; }
+bool isPrime(ll n) { if (n <= 1) return false; if (n <= 3) return true; if (n % 2 == 0 || n % 3 == 0) return false; for (int i = 5; i * i <= n; i = i + 6) if (n % i == 0 || n % (i + 2) == 0) return false; return true; }
 bool isPowerOfTwo(int n) { if (n == 0) return false; return (ceil(log2(n)) == floor(log2(n))); }
 bool isPerfectSquare(ll x) { if (x >= 0) { ll sr = sqrt(x); return (sr * sr == x); } return false; }
 
@@ -108,96 +108,37 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-void cons(vvll& edge, vll& path, map<pll, ll>& flow){
-    ll mn = 1e16;
-    ll n = path.size();
-    fl(i,n-1){
-        mn = min(mn, edge[path[i]][path[i+1]]);
-    }
-    // cout<<mn<<endl;
-    fl(i, n-1){
-        ll u = path[i];
-        ll v = path[i+1];
-        if(flow.find(mp(u,v))!=flow.end()){ // forward edge
-            edge[u][v] -= mn;
-            edge[v][u] += mn;
-            flow[mp(u,v)] += mn;
-        }
-        else{
-            edge[u][v] -= mn;
-            edge[v][u] += mn;
-            flow[mp(v,u)] -= mn;
-        }
-    }
-}
-void dfs(ll i, vll& par, vvll& edge, vector<bool>& vis, ll n){
-    vis[i] = true;
-    for(ll j = 0; j < n; ++j){
-        if(j!=i && edge[i][j]!=0 && !vis[j]){
-            par[j] = i;
-            dfs(j, par, edge, vis, n);
-        }
-    }
-}
-vll getpath(vll& par, ll n){
-    vll path;
-    path.pb(n-1);
-    ll at = n-1;
-    while(at !=0){
-        at = par[at];
-        path.pb(at);
-    }
-    reverse(path.begin(), path.end());
-    return path;
-}
 void solve() {
     ll n;
     cin>>n;
-    ll m;
-    cin>>m;
-    vvll graph(n);
-    // set<tuple<ll ,ll, ll>> edges;
-    vvll edge(n, vll(n,0));
-    map<pll , ll> flow;
-    fl(i,m){
-        ll u, v, w;
-        cin>>u>>v>>w;
-        u--; v--;
-        edge[u][v] += w;
-        graph[u].pb(v);
-
-        // edges.insert({u,v,w});
-        flow[mp(u,v)] = 0;
+    vll vec(n);
+    fl(i,n){
+        cin>>vec[i];
+        vec[i]--;
     }
-    vector<bool> vis(n, false);
-    vll par(n,-1);
-    while(true){
-        fl(i,n){
-            vis[i] = false;
-            par[i] = -1;
+    sort(vec.begin(), vec.end());
+    vvll dp(n+1, vll((2*n)+1, 1e16));
+    dp[0][0] = 0;
+    for(int i=0; i<=n; i++){
+        for(int j =0 ; j< 2*n; j++){
+            if(dp[i][j]!=1e16){
+                if(i<n){
+                    dp[i+1][j+1] = min(dp[i+1][j+1], dp[i][j] + abs(vec[i]- j));
+                }
+                dp[i][j+1] = min(dp[i][j+1] , dp[i][j]);
+            }
         }
-        dfs(0, par, edge, vis, n);
-        if(!vis[n-1]){
-            break;
-        }
-        vll path = getpath(par, n);
-        // printvec(path);
-        cons(edge, path, flow);
-        // break;
     }
-    ll res = 0;
-    for(auto it: graph[0]){
-
-            res += flow[mp(0,it)];
-        
-    }
-    cout<<res<<endl;
-
+    cout<<dp[n][2*n-1]<<endl;
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    solve();
+    ll t;
+    cin >> t;
+    fl(i, t) {
+        solve();
+    }
     return 0;
 }

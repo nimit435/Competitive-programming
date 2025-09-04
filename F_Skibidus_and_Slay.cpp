@@ -108,96 +108,143 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-void cons(vvll& edge, vll& path, map<pll, ll>& flow){
-    ll mn = 1e16;
-    ll n = path.size();
-    fl(i,n-1){
-        mn = min(mn, edge[path[i]][path[i+1]]);
-    }
-    // cout<<mn<<endl;
-    fl(i, n-1){
-        ll u = path[i];
-        ll v = path[i+1];
-        if(flow.find(mp(u,v))!=flow.end()){ // forward edge
-            edge[u][v] -= mn;
-            edge[v][u] += mn;
-            flow[mp(u,v)] += mn;
-        }
-        else{
-            edge[u][v] -= mn;
-            edge[v][u] += mn;
-            flow[mp(v,u)] -= mn;
+void dfs(ll i, ll par, vll& parent,vll& depth, vvll& tree, vector<set<ll>>& chil, vll& val){
+    for(auto it: tree[i]){
+        if(it != par){
+            parent[it] = i;
+            chil[i].insert(val[it]);
+            depth[it] = depth[i]+1;
+            dfs(it, i, parent, depth, tree, chil, val);
         }
     }
-}
-void dfs(ll i, vll& par, vvll& edge, vector<bool>& vis, ll n){
-    vis[i] = true;
-    for(ll j = 0; j < n; ++j){
-        if(j!=i && edge[i][j]!=0 && !vis[j]){
-            par[j] = i;
-            dfs(j, par, edge, vis, n);
-        }
-    }
-}
-vll getpath(vll& par, ll n){
-    vll path;
-    path.pb(n-1);
-    ll at = n-1;
-    while(at !=0){
-        at = par[at];
-        path.pb(at);
-    }
-    reverse(path.begin(), path.end());
-    return path;
 }
 void solve() {
     ll n;
     cin>>n;
-    ll m;
-    cin>>m;
-    vvll graph(n);
-    // set<tuple<ll ,ll, ll>> edges;
-    vvll edge(n, vll(n,0));
-    map<pll , ll> flow;
-    fl(i,m){
-        ll u, v, w;
-        cin>>u>>v>>w;
+    vll val(n);
+    fl(i,n){
+        cin>>val[i];
+    }
+    vvll indices(n+1);
+    fl(i,n){
+        indices[val[i]].pb(i);
+    }
+    vvll tree(n);
+    vector<multiset<ll>> vals(n);
+
+    fl(i,n-1){
+        ll u, v;
+        cin>>u>>v;
         u--; v--;
-        edge[u][v] += w;
-        graph[u].pb(v);
+        tree[u].pb(v);
+        tree[v].pb(u);
+        vals[u].insert(val[v]);
+        vals[v].insert(val[u]);
 
-        // edges.insert({u,v,w});
-        flow[mp(u,v)] = 0;
     }
-    vector<bool> vis(n, false);
-    vll par(n,-1);
-    while(true){
-        fl(i,n){
-            vis[i] = false;
-            par[i] = -1;
+    // vector<set<ll>> chil(n);
+    // vector<ll> parent(n);
+    vll depth(n);
+    // parent[0] = -1;
+    string res = "";
+    // dfs(0, -1, parent, depth, tree, chil, val);
+    // auto cmp = [&](int i, int j){
+    //     if(depth[i]<depth[j]){
+    //         return true;
+    //     }
+    //     else{
+    //         return false;
+    //     }
+    // };
+    // for(int i=1; i<=n; i++ ){
+    //     sort(indices[i].begin(), indices[i].end(), cmp);
+    // }
+    for(int i= 1; i<=n; i++){
+        if(indices[i].size()==0){
+            res+= '0';
+            continue;
         }
-        dfs(0, par, edge, vis, n);
-        if(!vis[n-1]){
-            break;
-        }
-        vll path = getpath(par, n);
-        // printvec(path);
-        cons(edge, path, flow);
-        // break;
-    }
-    ll res = 0;
-    for(auto it: graph[0]){
+        // bool found = false;
+        // for(auto ind: indices[i]){
+        //     // if(ind!=0 && val[parent[ind]]==i){
+        //     //     // cout<<"yo1"<<endl;
+        //     //     res += '1';
+        //     //     found = true;
+        //     //     break;
+        //     // }
+        //     // if(ind!=0 && parent[ind]!=0 && val[parent[parent[ind]]]==i){
+        //     //     // cout<<"yo2"<<endl;
+        //     //     // cout<<ind<<endl;
+        //     //     res += '1';
+        //     //     found = true;
+        //     //     break;
+        //     // }
+        //     if(chil[ind].find(i)!=chil[ind].end()){
+        //         // cout<<"yo3"<<endl;
 
-            res += flow[mp(0,it)];
-        
+        //         res+= '1';
+        //         found = true;
+        //         break;
+        //     }
+        //     else{
+        //         bool f = false;
+        //         for(auto it: tree[ind]){
+        //             if(it!=parent[ind]){
+        //                 if(chil[it].find(i)!=chil[it].end()){
+        //                     //  cout<<"yo4"<<endl;
+
+        //                     res+= '1';
+        //                     found = true;
+        //                     f = true;
+        //                     break;
+        //                 }
+        //             }
+        //         }
+        //         if(f){
+        //             break;
+        //         }
+        //     }
+        // }
+        // if(!found){
+        //     res+='0';
+
+
+        // }
+        bool found = false;
+        for(auto ind: indices[i]){
+            if(vals[ind].find(i)!=vals[ind].end()){
+                found = true;
+                break;
+            }
+            bool f = false;
+            for(auto it: tree[ind]){
+                if(vals[it].count(i)>1){
+                    found = true;
+                    f = true;
+                    break;
+                }
+            }
+            if(f){
+                break;
+            }
+        }
+        if(found){
+            res+='1';
+        }
+        else{
+            res+='0';
+        }
     }
     cout<<res<<endl;
-
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    solve();
+    ll t;
+    cin >> t;
+    fl(i, t) {
+        solve();
+    }
     return 0;
 }

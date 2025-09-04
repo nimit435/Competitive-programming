@@ -108,96 +108,95 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-void cons(vvll& edge, vll& path, map<pll, ll>& flow){
-    ll mn = 1e16;
-    ll n = path.size();
-    fl(i,n-1){
-        mn = min(mn, edge[path[i]][path[i+1]]);
-    }
-    // cout<<mn<<endl;
-    fl(i, n-1){
-        ll u = path[i];
-        ll v = path[i+1];
-        if(flow.find(mp(u,v))!=flow.end()){ // forward edge
-            edge[u][v] -= mn;
-            edge[v][u] += mn;
-            flow[mp(u,v)] += mn;
-        }
-        else{
-            edge[u][v] -= mn;
-            edge[v][u] += mn;
-            flow[mp(v,u)] -= mn;
-        }
-    }
-}
-void dfs(ll i, vll& par, vvll& edge, vector<bool>& vis, ll n){
-    vis[i] = true;
-    for(ll j = 0; j < n; ++j){
-        if(j!=i && edge[i][j]!=0 && !vis[j]){
-            par[j] = i;
-            dfs(j, par, edge, vis, n);
-        }
-    }
-}
-vll getpath(vll& par, ll n){
-    vll path;
-    path.pb(n-1);
-    ll at = n-1;
-    while(at !=0){
-        at = par[at];
-        path.pb(at);
-    }
-    reverse(path.begin(), path.end());
-    return path;
-}
 void solve() {
     ll n;
     cin>>n;
-    ll m;
-    cin>>m;
-    vvll graph(n);
-    // set<tuple<ll ,ll, ll>> edges;
-    vvll edge(n, vll(n,0));
-    map<pll , ll> flow;
-    fl(i,m){
-        ll u, v, w;
-        cin>>u>>v>>w;
-        u--; v--;
-        edge[u][v] += w;
-        graph[u].pb(v);
-
-        // edges.insert({u,v,w});
-        flow[mp(u,v)] = 0;
-    }
-    vector<bool> vis(n, false);
-    vll par(n,-1);
-    while(true){
-        fl(i,n){
-            vis[i] = false;
-            par[i] = -1;
+    vll vec(n);
+    ll one = -1;
+    ll twcnt = 0;
+    fl(i, n){
+        cin>>vec[i];
+        if(vec[i]==1){
+            one = i;
         }
-        dfs(0, par, edge, vis, n);
-        if(!vis[n-1]){
-            break;
+        if(vec[i] == 2){
+            twcnt++;
         }
-        vll path = getpath(par, n);
-        // printvec(path);
-        cons(edge, path, flow);
-        // break;
     }
-    ll res = 0;
-    for(auto it: graph[0]){
+    ll left = 0;
+    ll right = n-1;
+    vpll moves;
+    int j = n-1;
+    ll tw = twcnt;
+    while(twcnt>0){
+        if(vec[j] == 2){
+            j--;
+            twcnt--;
+        }
+        else if(vec[j] == 1){
+            while(vec[left] != 2){
+                left++;
+            }
+            swap(vec[left], vec[j]);
+            moves.pb(mp(left+1, j+1));
+            if(one == j){
+                one = left;
+            }
+            left++;
+            twcnt--;
+            j--;
+        }
+        else if(vec[j] == 0){
+            while(vec[left]!= 2){
+                left++;
+            }
+            swap(vec[one], vec[j]);
+            moves.pb(mp(one+1, j+1));
+            swap(vec[j], vec[left]);
+            one = left;
+            moves.pb(mp(j+1, left+1));
+            j--;
+            twcnt--;
+            left++;
 
-            res += flow[mp(0,it)];
+        }
         
     }
-    cout<<res<<endl;
 
+
+    right = n-1-tw;
+    left = 0;
+    while(left<right){
+        while(vec[left]!=1){
+            left++;
+        }
+        if(right>left){
+            while(vec[right]!=0){
+                right--;
+            }
+        }
+        if(right>left){
+            swap(vec[right], vec[left]);
+            moves.pb(mp(right+1, left+1));
+        }
+        left++;
+        right--;
+    }
+    // printvec(vec); // n-1- right= tw
+
+    cout<<moves.size()<<endl;
+    fl(i,moves.size()){
+        cout<<moves[i]<<endl;
+    }
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    solve();
+    ll t;
+    cin >> t;
+    fl(i, t) {
+        solve();
+    }
     return 0;
 }
