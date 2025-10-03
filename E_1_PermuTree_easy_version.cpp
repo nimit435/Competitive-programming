@@ -108,89 +108,84 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-ll great_or_eq(vll& ind, ll l){
-    ll n = ind.size();
-
-    if(ind[n-1]< l){
-        return -1;
+ll count_chil(ll i, vvll& chil, vll& chilcnt){
+    ll res = 0;
+    for(auto it: chil[i]){
+        res += count_chil(it, chil, chilcnt) + 1;
     }
-    ll left = 0; // ind[left]<l
-    ll right = n-1; //ind[right]>=l
-    
-    if(ind[left]>=l){
-        return ind[left];
-    }
-    while(right-left>1){
-        ll mid = (left+right)/2;
-        if(ind[mid]<l){
-            left = mid;
-        }
-        else{
-            right = mid;
-        }
-    }
-    return ind[right];
-
+    chilcnt[i] = res;
+    return res;
 }
-// 
+ll mxval(vll& arr){
+    ll sum = sumvec(arr);
+    // ll sum  = 0;
+    ll m = arr.size();
+    if(m==0){
+        return 0;
+    }
+    vvll dp(m+1, vll(sum+1,0));
+    ll si = arr[0];
+    ll si1 = 0;
+    for(int i=2; i<=m; i++){
+        si += arr[i-1];
+        si1 += arr[i-2];
+        for(ll B = 0; B<=si; B++){
+            for(ll b = max(0LL,B-si1); b<=min(arr[i-1],B); b++){
+                dp[i][B] = max(dp[i-1][B-b] + ((b)*(si1-(B-b)))+((arr[i-1]-b)*(B-b)), dp[i][B]);
+            }
+        }
+    }
+    ll mx = 0;
+    for(int i=0; i<=si; i++){
+        mx = max(mx, dp[m][i]);
+    }
+    return mx;
+}
+ll func(ll i, vvll& chil, vll& chilcnt){
+    ll n = chil[i].size();
+    ll res = 0;
+    
+    vll chilsz;
+    for(auto it: chil[i]){
+        chilsz.pb(chilcnt[it]+1);
+    }
+    res = mxval(chilsz);
+    
+    
+    for(auto it: chil[i]){
+        res += func(it, chil , chilcnt);
+    }
+    return res;
+}
 void solve() {
     ll n;
     cin>>n;
-    ll q;
-    cin>>q;
-    vll vec(n);
-    fl(i,n){
-        cin>>vec[i];
+    vvll chil(n);
+    vll par(n);
+    vvll tree(n);
+    for(int i=1; i<n; i++){
+        ll u;
+        cin>>u;
+        u--;
+        tree[u].pb(i);
+        tree[i].pb(u);
+        par[i] = u;
+        chil[u].pb(i);
     }
-    vector<ll> ind;
-    fl(i,n-2){ /// 4 3 2 1
-        if(vec[i+1]<vec[i] && vec[i+2]<vec[i+1]){
-            ind.pb(i);
-        }
-    }
-    if(ind.size()==0){
-        fl(i, q){
-            cout<<"YES"<<endl;
-        }
-        return;
-    }
-    while(q--){
-        ll l, r;
-        cin>>l>>r;
-        l--; r--;
-        
-        if(l==r){
-            cout<<"YES"<<endl;
-            continue;
-        }
-        if(r-l == 1){
-            cout<<"YES"<<endl;
-            continue;
-        }
-        ll i = great_or_eq(ind, l);
-        if(i==-1){
-            cout<<"YES"<<endl;
-            continue;
-        }
-        else{
-            if(r-i+1>=3){
-                cout<<"NO"<<endl;
-            }
-            else{
-                cout<<"YES"<<endl;
-            }
-        }
-    }
+    vll chilcnt(n,0);
+    count_chil(0, chil, chilcnt);
+    ll res = func(0 , chil, chilcnt);
     
-    
+    cout<<res<<endl;
+
 
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t;
-    cin >> t;
+    ll t = 1;
+
     fl(i, t) {
         solve();
     }

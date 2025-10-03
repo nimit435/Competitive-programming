@@ -108,82 +108,65 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-ll great_or_eq(vll& ind, ll l){
-    ll n = ind.size();
-
-    if(ind[n-1]< l){
-        return -1;
-    }
-    ll left = 0; // ind[left]<l
-    ll right = n-1; //ind[right]>=l
-    
-    if(ind[left]>=l){
-        return ind[left];
-    }
-    while(right-left>1){
-        ll mid = (left+right)/2;
-        if(ind[mid]<l){
-            left = mid;
-        }
-        else{
-            right = mid;
+void dfs(ll i, ll par, vll& depth, vvll& tree){
+    for(auto it: tree[i]){
+        if(it!=par){
+            depth[it] = depth[i]+1;
+            dfs(it, i, depth, tree);
         }
     }
-    return ind[right];
-
 }
-// 
 void solve() {
     ll n;
     cin>>n;
-    ll q;
-    cin>>q;
-    vll vec(n);
-    fl(i,n){
-        cin>>vec[i];
+    ll k;
+    cin>>k;
+    vll marked(k);
+    fl(i, k){
+        cin>>marked[i]; 
+        marked[i]--; 
     }
-    vector<ll> ind;
-    fl(i,n-2){ /// 4 3 2 1
-        if(vec[i+1]<vec[i] && vec[i+2]<vec[i+1]){
-            ind.pb(i);
-        }
+    vvll tree(n);
+    fl(i, n-1){
+        ll u, v;
+        cin>>u>>v;
+        u--; v--;
+        tree[u].pb(v);
+        tree[v].pb(u);
     }
-    if(ind.size()==0){
-        fl(i, q){
-            cout<<"YES"<<endl;
-        }
+    if(k == 1){
+        cout<<0<<endl;
         return;
     }
-    while(q--){
-        ll l, r;
-        cin>>l>>r;
-        l--; r--;
-        
-        if(l==r){
-            cout<<"YES"<<endl;
-            continue;
-        }
-        if(r-l == 1){
-            cout<<"YES"<<endl;
-            continue;
-        }
-        ll i = great_or_eq(ind, l);
-        if(i==-1){
-            cout<<"YES"<<endl;
-            continue;
-        }
-        else{
-            if(r-i+1>=3){
-                cout<<"NO"<<endl;
-            }
-            else{
-                cout<<"YES"<<endl;
-            }
+    vll depth(n, 0);
+    ll mx = 0;
+    ll curr = -1;
+    dfs(marked[0], -1, depth, tree);
+    fl(i,k){
+        if(depth[marked[i]]> mx){
+            curr = marked[i];
+            mx = depth[marked[i]];
         }
     }
+    vll depth2(n,0);
+    dfs(curr, -1, depth2, tree);
+    mx = 0;
+    curr = -1;
     
+    fl(i, k){
+        mx = max(mx, depth2[marked[i]]);
+    }
+    // cout<<"mx: "<<mx<<endl;
+    if(mx == 1){
+        cout<<mx<<endl;
+    }
+    else if(mx%2 == 0){
+        cout<<mx/2<<endl;
+    }
+    else{
+        cout<<(mx/2)+1<<endl;
+    }
     
-
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

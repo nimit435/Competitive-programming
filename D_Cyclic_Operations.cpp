@@ -108,82 +108,68 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-ll great_or_eq(vll& ind, ll l){
-    ll n = ind.size();
-
-    if(ind[n-1]< l){
-        return -1;
-    }
-    ll left = 0; // ind[left]<l
-    ll right = n-1; //ind[right]>=l
-    
-    if(ind[left]>=l){
-        return ind[left];
-    }
-    while(right-left>1){
-        ll mid = (left+right)/2;
-        if(ind[mid]<l){
-            left = mid;
-        }
-        else{
-            right = mid;
-        }
-    }
-    return ind[right];
-
-}
-// 
 void solve() {
     ll n;
     cin>>n;
-    ll q;
-    cin>>q;
+    ll k;
+    cin>>k;
     vll vec(n);
     fl(i,n){
         cin>>vec[i];
+        vec[i]--;
     }
-    vector<ll> ind;
-    fl(i,n-2){ /// 4 3 2 1
-        if(vec[i+1]<vec[i] && vec[i+2]<vec[i+1]){
-            ind.pb(i);
-        }
+    vll succ(n);
+    fl(i,n){
+        succ[i] = vec[i];
     }
-    if(ind.size()==0){
-        fl(i, q){
-            cout<<"YES"<<endl;
+    if(k==1){
+        fl(i,n){
+            if(vec[i]!=i){
+                cout<<"NO"<<endl;
+                return;
+            }
         }
+        cout<<"YES"<<endl;
         return;
     }
-    while(q--){
-        ll l, r;
-        cin>>l>>r;
-        l--; r--;
-        
-        if(l==r){
-            cout<<"YES"<<endl;
-            continue;
-        }
-        if(r-l == 1){
-            cout<<"YES"<<endl;
-            continue;
-        }
-        ll i = great_or_eq(ind, l);
-        if(i==-1){
-            cout<<"YES"<<endl;
-            continue;
-        }
-        else{
-            if(r-i+1>=3){
+    else{
+        fl(i,n){
+            if(succ[i]==i){
                 cout<<"NO"<<endl;
-            }
-            else{
-                cout<<"YES"<<endl;
+                return;
             }
         }
+        vll cycle_id(n,-2);
+        fl(i,n){
+            if(cycle_id[i]!=-2){
+                continue;
+            }
+            vll path;
+            path.pb(i);
+            ll at = i;
+            cycle_id[at] = -3;
+            while(cycle_id[succ[at]]==-2){
+                at = succ[at];
+                cycle_id[at] = -3;
+                path.pb(at);
+            }
+            ll cycle_size = 0;
+            bool in_cycle = false;
+            for(auto it: path){
+                in_cycle = in_cycle || (succ[at]==it);
+                if(in_cycle){
+                    cycle_size++;
+                }
+            }
+            if(cycle_size!=k && cycle_size>0){
+                cout<<"NO"<<endl;
+                // cout<<cycle_size<<endl;
+                return;
+            }
+        }
+        cout<<"YES"<<endl;
+        return;
     }
-    
-    
-
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

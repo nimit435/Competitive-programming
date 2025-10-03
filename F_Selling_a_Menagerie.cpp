@@ -108,82 +108,98 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-ll great_or_eq(vll& ind, ll l){
-    ll n = ind.size();
 
-    if(ind[n-1]< l){
-        return -1;
-    }
-    ll left = 0; // ind[left]<l
-    ll right = n-1; //ind[right]>=l
-    
-    if(ind[left]>=l){
-        return ind[left];
-    }
-    while(right-left>1){
-        ll mid = (left+right)/2;
-        if(ind[mid]<l){
-            left = mid;
-        }
-        else{
-            right = mid;
-        }
-    }
-    return ind[right];
-
-}
-// 
 void solve() {
     ll n;
     cin>>n;
-    ll q;
-    cin>>q;
-    vll vec(n);
+    vll succ(n);
+    vvll bef(n);
+    vll cost(n);
+    vector<bool> incyc(n, false);
     fl(i,n){
-        cin>>vec[i];
+        cin>>succ[i];
+        succ[i]--;
+        bef[succ[i]].pb(i);
     }
-    vector<ll> ind;
-    fl(i,n-2){ /// 4 3 2 1
-        if(vec[i+1]<vec[i] && vec[i+2]<vec[i+1]){
-            ind.pb(i);
-        }
+    fl(i,n){
+        cin>>cost[i];
     }
-    if(ind.size()==0){
-        fl(i, q){
-            cout<<"YES"<<endl;
-        }
-        return;
-    }
-    while(q--){
-        ll l, r;
-        cin>>l>>r;
-        l--; r--;
-        
-        if(l==r){
-            cout<<"YES"<<endl;
+    vll cycle_id(n, -2);
+    vector<map<ll, ll>> cycles;
+    fl(i,n){
+        if(cycle_id[i]!=-2){
             continue;
         }
-        if(r-l == 1){
-            cout<<"YES"<<endl;
-            continue;
+        vll path;
+        path.pb(i);
+        ll at = i;
+        cycle_id[at] = -3;
+        while(cycle_id[succ[at]]==-2){
+            at = succ[at];
+            cycle_id[at] = -3;
+            path.pb(at);
         }
-        ll i = great_or_eq(ind, l);
-        if(i==-1){
-            cout<<"YES"<<endl;
-            continue;
-        }
-        else{
-            if(r-i+1>=3){
-                cout<<"NO"<<endl;
+        map<ll, ll> cycle;
+        bool in_cycle = false;
+        for(auto it: path){
+            in_cycle = in_cycle||(succ[at]==it);
+            if(in_cycle){
+                cycle[it] = cycle.size(); 
+                incyc[it] = true;
             }
-            else{
-                cout<<"YES"<<endl;
+            cycle_id[it] = in_cycle ? cycles.size() : -1;
+        }
+        cycles.pb(cycle);
+    }
+    vvll graph(n);
+    vll indeg(n);
+    fl(i, n){
+        if(!incyc[i] && !incyc[succ[i]]){
+            graph[i].pb(succ[i]);
+            indeg[succ[i]]++;
+        }
+    }
+    queue<ll> q;
+    fl(i,n){
+        if(!incyc[i] && indeg[i]==0){
+            q.push(i);
+        }
+    }
+    vll topo;
+    while(!q.empty()){
+        ll a = q.front();
+        q.pop();
+        topo.pb(a+1);
+        for(auto it: graph[a]){
+            indeg[it]--;
+            if(indeg[it]==0){
+                q.push(it);
             }
         }
     }
-    
-    
 
+    for(auto it: cycles){
+        vll vec(it.size());
+        for(auto i: it){
+            vec[i.ss] = i.ff;
+        }
+        ll mn = 1e16;
+        ll ind = -1;
+        fl(j, vec.size()){
+            if(cost[vec[j]]<mn){
+                mn = cost[vec[j]];
+                ind = j;
+            }
+        }
+        for(int j = ind+1; j< vec.size(); j++){
+            topo.pb(vec[j]+1);
+        }
+        for(int j = 0; j<=ind; j++){
+            topo.pb(vec[j]+1);
+        }
+    }
+    
+    printvec(topo);
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

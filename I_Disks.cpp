@@ -108,89 +108,104 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-ll great_or_eq(vll& ind, ll l){
-    ll n = ind.size();
+bool is_tangent(pair<pair<ll, ll>, ll>& a, pair<pair<ll, ll>, ll>& b){
+    ll xa = a.ff.ff;
+    ll ya = a.ff.ss;
+    ll ra = a.ss;
+    ll xb = b.ff.ff;
+    ll yb = b.ff.ss;
+    ll rb = b.ss;
+    __int128_t dx = xa - xb;
+    __int128_t dy = ya - yb;
+    __int128_t dist_sq = dx * dx + dy * dy;
 
-    if(ind[n-1]< l){
-        return -1;
-    }
-    ll left = 0; // ind[left]<l
-    ll right = n-1; //ind[right]>=l
+    __int128_t r_sum = ra + rb;
+    __int128_t r_sum_sq = r_sum * r_sum;
     
-    if(ind[left]>=l){
-        return ind[left];
-    }
-    while(right-left>1){
-        ll mid = (left+right)/2;
-        if(ind[mid]<l){
-            left = mid;
-        }
-        else{
-            right = mid;
-        }
-    }
-    return ind[right];
+    return dist_sq == r_sum_sq;
 
 }
-// 
+pair<bool, pll> is_bipartite(ll i, vvll& graph, vector<bool>& vis, vector<bool>& color){
+    queue<ll> q;
+    vis[i] = true;
+    color[i] = false;
+    ll cnt1 = 0;
+    ll cnt2 = 0;
+    bool ispos = true;
+    
+    q.push(i);
+    while(!q.empty()){
+        ll a = q.front();
+        q.pop();
+        if(color[a]){
+            cnt1++;
+        }
+        else{
+            cnt2++;
+        }
+        for(auto it: graph[a]){
+            if(!vis[it]){
+                color[it] = !color[a];
+                vis[it] = true;
+
+                q.push(it);
+                
+            }
+            else{
+                if(color[it]==color[a]){
+                    ispos = false;
+                }
+            }
+        }
+    }
+    if(!ispos){
+        return mp(false, mp(-1, -1));
+    }
+    return mp(true, mp(cnt1, cnt2));
+    
+}
 void solve() {
     ll n;
     cin>>n;
-    ll q;
-    cin>>q;
-    vll vec(n);
+    vector<pair<pair<ll,ll>,ll>> vec(n);
     fl(i,n){
-        cin>>vec[i];
+        ll x, y, r;
+        cin>>x>>y>>r;
+        vec[i] = {{x,y}, r};
     }
-    vector<ll> ind;
-    fl(i,n-2){ /// 4 3 2 1
-        if(vec[i+1]<vec[i] && vec[i+2]<vec[i+1]){
-            ind.pb(i);
-        }
-    }
-    if(ind.size()==0){
-        fl(i, q){
-            cout<<"YES"<<endl;
-        }
-        return;
-    }
-    while(q--){
-        ll l, r;
-        cin>>l>>r;
-        l--; r--;
-        
-        if(l==r){
-            cout<<"YES"<<endl;
-            continue;
-        }
-        if(r-l == 1){
-            cout<<"YES"<<endl;
-            continue;
-        }
-        ll i = great_or_eq(ind, l);
-        if(i==-1){
-            cout<<"YES"<<endl;
-            continue;
-        }
-        else{
-            if(r-i+1>=3){
-                cout<<"NO"<<endl;
+    vvll graph(n);
+    fl(i,n){
+        for(int j= i+1; j<n; j++){
+            if(is_tangent(vec[i], vec[j])){
+                graph[i].pb(j);
+                graph[j].pb(i);
             }
-            else{
+        }
+    }
+
+    vector<bool> vis(n, false);
+    vector<bool> color(n, false);
+    fl(i,n){
+        if(!vis[i]){
+            pair<bool, pll> res = is_bipartite(i, graph, vis, color);
+
+
+            if(res.ff && (res.ss.ss!= res.ss.ff)){
                 cout<<"YES"<<endl;
+                return;
             }
         }
     }
-    
-    
+    cout<<"NO"<<endl;
+
 
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t;
-    cin >> t;
+    ll t = 1; 
+
     fl(i, t) {
         solve();
     }
