@@ -107,104 +107,100 @@ ll merge(vector<ll> &arr, ll low, ll mid, ll high) {vector<int> temp;ll left = l
 ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) return cnt;int mid = (low + high) / 2;cnt += mergeSort(arr, low, mid);cnt += mergeSort(arr, mid + 1, high);cnt += merge(arr, low, mid, high);return cnt;}
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
-//Code
-void func(ll i, ll par, vvll& tree, vll& seq){
-    seq.pb(i);
-    for(auto it: tree[i]){
-        if(it!= par){
-            func(it , i, tree, seq);
+bool dfs(ll i, ll par, vvll& graph, ll& cycle_node, vector<bool>& vis){
+    vis[i] = true;
+    for(auto it:graph[i]){
+        if(it == par) continue;
+        if(vis[it]){
+            cycle_node = it;
+            return true;
         }
+        if(dfs(it, i, graph, cycle_node, vis)) return true;
     }
+    return false;
 }
+//Code
 void solve() {
     ll n;
     cin>>n;
-    vvll cols(3, vll(n));
-    
+    ll a;
+    ll b;
+    cin>>a>>b;
+    a--; b--;
+    vvll graph(n);
     fl(i,n){
-        cin>>cols[0][i];
-    }
-    fl(i,n){
-        cin>>cols[1][i];
-    }
-    fl(i,n){
-        cin>>cols[2][i];
-    }
-    vvll tree(n);
-    fl(i, n-1){
         ll u, v;
         cin>>u>>v;
         u--; v--;
-        tree[u].pb(v);
-        tree[v].pb(u);
+        graph[u].pb(v);
+        graph[v].pb(u);
     }
-   
-    ll a = -1;
-
-
-    fl(i,n){
-        if(tree[i].size() == 1){
-            a = i;
-        }
-        if(tree[i].size()>2){
-            cout<<-1<<endl;
-            return;
-        }
+    if(a==b){
+        cout<<"NO"<<endl;
+        return;
     }
-    ll par = -1; 
-    vll seq;
-    ll ifin = -1;
-    ll jfin = -1;
-    func(a, -1, tree, seq);
-    // ab ba ac ca bc cb
-    ll mn = 1e16;
-    for(int i= 0; i<=2; i++){
-        for(int j = 0; j<=2; j++){
-            if(i==j){
-                continue;
-            }
-            ll res = 0;
-            for(int k = 0; k<seq.size(); k++){
-                ll f = (3)-(i+j);
-                if((k%3)==0){
-                    res += cols[i][seq[k]];
-                }
-                else if((k%3) == 1){
-                    res += cols[j][seq[k]];
-                }
-                else{
-                    res += cols[f][seq[k]];
-                }
-            }
-            if(res<mn){
-                mn = res;
-                ifin = i;
-                jfin = j;
+    stack<ll> st;
+    vector<bool> vis(n, false);
+
+    vis[b] = true;
+    ll node = -1;
+    dfs(b, -1, graph, node, vis);
+    if(b==node){
+        cout<<"YES"<<endl;
+        return;
+    }
+    queue<ll> q1;
+    q1.push(b);
+    vector<bool> vis1(n, false);
+    vll dist1(n, 1e18);
+    dist1[b] = 0;
+    vis1[b] = true;  
+
+    while (!q1.empty()) {
+        ll u = q1.front();
+        q1.pop();
+
+        for (auto it : graph[u]) {
+            if (!vis1[it]) {
+                vis1[it] = true;
+                dist1[it] = dist1[u] + 1;
+                q1.push(it);
             }
         }
     }
-    cout<<mn<<endl;
-    vll col(n);
-    for(int i=0; i<seq.size(); i++){
-        if((i%3) == 0){
-            col[seq[i]] = ifin+1;
-        }
-        else if((i%3) == 1){
-            col[seq[i]] = jfin+1;
-        }
-        else{
-            col[seq[i]] = (3-(ifin+jfin))+1;
+    queue<ll> q2;
+    q2.push(a);
+    vector<bool> vis2(n, false);
+    vll dist2(n, 1e18);
+    dist2[a] = 0;
+    vis2[a] = true;
+    while(!q2.empty()){
+        ll u = q2.front();
+        q2.pop();
+        
+        for(auto it: graph[u]){
+            
+            if(!vis2[it]){
+                vis2[it] = true;
+                dist2[it] = dist2[u] + 1;
+                q2.push(it);
+            }
         }
     }
-    printvec(col);
-
+    // cout<<dist1[node]<<dist2[node]<<endl;
+    if(dist1[node]< dist2[node]){
+        cout<<"YES"<<endl;
+    }
+    else{
+        cout<<"NO"<<endl;
+    }
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t = 1;
-
+    ll t;
+    cin >> t;
     fl(i, t) {
         solve();
     }

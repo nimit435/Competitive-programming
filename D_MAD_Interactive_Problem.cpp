@@ -108,103 +108,56 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-void func(ll i, ll par, vvll& tree, vll& seq){
-    seq.pb(i);
-    for(auto it: tree[i]){
-        if(it!= par){
-            func(it , i, tree, seq);
+ll ask(ll j, vector<bool>& exempt){
+    cout<<"? ";
+    vll vec;
+    for(int i = 1; i<=j; i++){
+        if(!exempt[i]){
+            vec.pb(i);
         }
     }
+    cout<<vec.size()<<" ";
+    printvec(vec);
+    ll resp;
+    cin>>resp;
+    return resp;
 }
 void solve() {
     ll n;
     cin>>n;
-    vvll cols(3, vll(n));
-    
-    fl(i,n){
-        cin>>cols[0][i];
-    }
-    fl(i,n){
-        cin>>cols[1][i];
-    }
-    fl(i,n){
-        cin>>cols[2][i];
-    }
-    vvll tree(n);
-    fl(i, n-1){
-        ll u, v;
-        cin>>u>>v;
-        u--; v--;
-        tree[u].pb(v);
-        tree[v].pb(u);
-    }
-   
-    ll a = -1;
-
-
-    fl(i,n){
-        if(tree[i].size() == 1){
-            a = i;
-        }
-        if(tree[i].size()>2){
-            cout<<-1<<endl;
-            return;
-        }
-    }
-    ll par = -1; 
-    vll seq;
-    ll ifin = -1;
-    ll jfin = -1;
-    func(a, -1, tree, seq);
-    // ab ba ac ca bc cb
-    ll mn = 1e16;
-    for(int i= 0; i<=2; i++){
-        for(int j = 0; j<=2; j++){
-            if(i==j){
-                continue;
-            }
-            ll res = 0;
-            for(int k = 0; k<seq.size(); k++){
-                ll f = (3)-(i+j);
-                if((k%3)==0){
-                    res += cols[i][seq[k]];
-                }
-                else if((k%3) == 1){
-                    res += cols[j][seq[k]];
-                }
-                else{
-                    res += cols[f][seq[k]];
-                }
-            }
-            if(res<mn){
-                mn = res;
-                ifin = i;
-                jfin = j;
-            }
-        }
-    }
-    cout<<mn<<endl;
-    vll col(n);
-    for(int i=0; i<seq.size(); i++){
-        if((i%3) == 0){
-            col[seq[i]] = ifin+1;
-        }
-        else if((i%3) == 1){
-            col[seq[i]] = jfin+1;
+    vector<bool> exempt((2*n)+3 , false);
+    vll ans(2*n);
+    vll known;
+    for(int j =2; j<=2*n; j++){
+        ll res = ask(j, exempt);
+        if(res == 0){
+            continue;
         }
         else{
-            col[seq[i]] = (3-(ifin+jfin))+1;
+            ans[j-1] = res;
+            exempt[j] = true;
+            known.pb(j);
         }
     }
-    printvec(col);
+    for(int i=0; i<2*n; i++){
+        if(ans[i] == 0){
+            cout<<"? "<<n+1<<" "<<i+1<<" ";
+            printvec(known);
+            ll resp;
+            cin>>resp;
+            ans[i] = resp;
+        }
+    }
+    cout<<"! ";
+    printvec(ans);
 
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t = 1;
-
+    ll t;
+    cin >> t;
     fl(i, t) {
         solve();
     }

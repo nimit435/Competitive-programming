@@ -108,96 +108,106 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-void func(ll i, ll par, vvll& tree, vll& seq){
-    seq.pb(i);
-    for(auto it: tree[i]){
-        if(it!= par){
-            func(it , i, tree, seq);
-        }
+ll func(int i , ll par, vector<bool>& special , vvll& tree, vll& numchil, vll& pare){
+    ll res = 0;
+    if(special[i]){
+        res++;
     }
+    for(auto it: tree[i]){
+        if(it == par) continue;
+        pare[it] = i;
+        res += func(it, i, special, tree, numchil, pare);
+    }
+    numchil[i] = res;
+    return res;
 }
 void solve() {
     ll n;
     cin>>n;
-    vvll cols(3, vll(n));
-    
-    fl(i,n){
-        cin>>cols[0][i];
-    }
-    fl(i,n){
-        cin>>cols[1][i];
-    }
-    fl(i,n){
-        cin>>cols[2][i];
+    ll m;
+    cin>>m;
+    ll k;
+    cin>>k;
+    vector<bool> special(n, false);
+    for(int i= 0; i<k; i++){
+        ll c;
+        cin>>c;
+        c--;
+        special[c] = true;
     }
     vvll tree(n);
-    fl(i, n-1){
-        ll u, v;
-        cin>>u>>v;
-        u--; v--;
-        tree[u].pb(v);
-        tree[v].pb(u);
-    }
-   
-    ll a = -1;
+    vector<pair<ll , pll>> edges;
+    fl(i,m){
+        ll u, v, w;
+        cin>>u>>v>>w;
+        u--; v--; 
 
-
-    fl(i,n){
-        if(tree[i].size() == 1){
-            a = i;
-        }
-        if(tree[i].size()>2){
-            cout<<-1<<endl;
-            return;
-        }
+        edges.pb({w, {u,v}});
     }
-    ll par = -1; 
-    vll seq;
-    ll ifin = -1;
-    ll jfin = -1;
-    func(a, -1, tree, seq);
-    // ab ba ac ca bc cb
-    ll mn = 1e16;
-    for(int i= 0; i<=2; i++){
-        for(int j = 0; j<=2; j++){
-            if(i==j){
-                continue;
-            }
-            ll res = 0;
-            for(int k = 0; k<seq.size(); k++){
-                ll f = (3)-(i+j);
-                if((k%3)==0){
-                    res += cols[i][seq[k]];
-                }
-                else if((k%3) == 1){
-                    res += cols[j][seq[k]];
-                }
-                else{
-                    res += cols[f][seq[k]];
-                }
-            }
-            if(res<mn){
-                mn = res;
-                ifin = i;
-                jfin = j;
-            }
-        }
-    }
-    cout<<mn<<endl;
-    vll col(n);
-    for(int i=0; i<seq.size(); i++){
-        if((i%3) == 0){
-            col[seq[i]] = ifin+1;
-        }
-        else if((i%3) == 1){
-            col[seq[i]] = jfin+1;
+    auto cmp = [&](auto a, auto b){
+        if(a.ff!=b.ff){
+            return a.ff<b.ff;
         }
         else{
-            col[seq[i]] = (3-(ifin+jfin))+1;
+            return true;
+        }
+    };
+    sort(edges.begin(), edges.end(), cmp);
+    vll parent(n , -1);
+    vll sz(n, 1);
+    auto find_par = [&](int i){
+        if(parent[i] == -1){
+            return i;
+        }
+        while(parent[i] != -1){
+            i = parent[i];
+        }
+        return i;
+    };
+    auto issame = [&](int i, int j){
+        return find_par(i) == find_par(j);
+    };
+    auto union_find = [&](int i, int j){
+        i = find_par(i);
+        j = find_par(j);
+        if(sz[i]>sz[j]){
+            swap(i,j);
+        }
+        sz[j] += sz[i];
+        parent[i] = j;
+    };
+
+    vll par(n, -1);
+    vector<pair<ll, pll>> tredges;
+    for(auto e: edges){
+        ll u = e.ss.ff;
+        ll v = e.ss.ss;
+        if(!issame(u,v) && tredges.size()<n-1){
+            tree[u].pb(v);
+            tree[v].pb(u);
+            tredges.pb(e);
+            union_find(u,v);
         }
     }
-    printvec(col);
-
+    vll numchil(n, 0);
+    func(0, -1, special, tree, numchil, par);
+    ll mx= 0;
+    for(auto e: tredges){
+        ll u = e.ss.ff;
+        ll v = e.ss.ss;
+        if(v== par[u]){
+            swap(u,v);
+        }
+        ll szu = k-numchil[v];
+        ll szv = numchil[v];
+        if(szu>0 && szv>0){
+            mx = max(mx, e.ff);
+        }
+    }
+    fl(i,k){
+        cout<<mx<<" ";
+    }
+    cout<<endl;
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001

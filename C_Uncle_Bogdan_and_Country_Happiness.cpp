@@ -108,27 +108,53 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-void func(ll i, ll par, vvll& tree, vll& seq){
-    seq.pb(i);
+ll fillchil(ll i, ll par, vvll& tree, vll& chil, vll& people, vll& parent){
+    ll res = people[i];
     for(auto it: tree[i]){
-        if(it!= par){
-            func(it , i, tree, seq);
+        if(it==par) continue;
+        parent[it] = i;
+        res += fillchil(it, i, tree, chil, people, parent);
+    }
+    chil[i] = res;
+    return res;
+}
+bool func(ll i, ll par, vvll& tree, vll& happ, vll& sad, vll& people){
+    bool res = true;
+    ll cnt = 0;
+    for(auto it: tree[i]){
+        if(it!=par){
+            cnt += sad[it];
+            res = res||func(it, i, tree, happ, sad, people);
+            if(!res){
+                return false;
+            }
         }
     }
+
+    if(cnt<sad[i]-people[i]){
+        
+        return false;
+    }
+    if(cnt>sad[i]+happ[i]-people[i]){
+        // cout<<cnt<<endl;
+        // cout<<i<<": ";
+        return false;
+    }
+
+    return true;
 }
 void solve() {
     ll n;
     cin>>n;
-    vvll cols(3, vll(n));
-    
+    ll m;
+    cin >> m;
+    vll people(n);
     fl(i,n){
-        cin>>cols[0][i];
+        cin>>people[i];
     }
+    vll index(n);
     fl(i,n){
-        cin>>cols[1][i];
-    }
-    fl(i,n){
-        cin>>cols[2][i];
+        cin>>index[i];
     }
     vvll tree(n);
     fl(i, n-1){
@@ -138,73 +164,50 @@ void solve() {
         tree[u].pb(v);
         tree[v].pb(u);
     }
-   
-    ll a = -1;
 
-
-    fl(i,n){
-        if(tree[i].size() == 1){
-            a = i;
-        }
-        if(tree[i].size()>2){
-            cout<<-1<<endl;
+    vll chil(n);
+    vll parent(n, -1);
+    fillchil(0, -1, tree, chil, people, parent);
+    vll happ(n);
+    vll sad(n);
+    for(int i= 0; i<n ; i++){
+        if((chil[i] + index[i])%2!=0){
+            cout<<"NO"<<endl;
             return;
         }
-    }
-    ll par = -1; 
-    vll seq;
-    ll ifin = -1;
-    ll jfin = -1;
-    func(a, -1, tree, seq);
-    // ab ba ac ca bc cb
-    ll mn = 1e16;
-    for(int i= 0; i<=2; i++){
-        for(int j = 0; j<=2; j++){
-            if(i==j){
-                continue;
-            }
-            ll res = 0;
-            for(int k = 0; k<seq.size(); k++){
-                ll f = (3)-(i+j);
-                if((k%3)==0){
-                    res += cols[i][seq[k]];
-                }
-                else if((k%3) == 1){
-                    res += cols[j][seq[k]];
-                }
-                else{
-                    res += cols[f][seq[k]];
-                }
-            }
-            if(res<mn){
-                mn = res;
-                ifin = i;
-                jfin = j;
-            }
+        happ[i] = (chil[i]+index[i])/2;
+        sad[i] = (chil[i]-index[i])/2;
+        
+        if(happ[i]<0 || happ[i]>chil[i]){
+            cout<<"NO"<<endl;
+            return;
+        }
+        ll cnt = 0;
+        for(auto it: tree[i]){
+            if(it==parent[i]) continue;
+            cnt += happ[it];
+        }
+        if(cnt>happ[i]){
+            cout<<"NO"<<endl;
         }
     }
-    cout<<mn<<endl;
-    vll col(n);
-    for(int i=0; i<seq.size(); i++){
-        if((i%3) == 0){
-            col[seq[i]] = ifin+1;
-        }
-        else if((i%3) == 1){
-            col[seq[i]] = jfin+1;
-        }
-        else{
-            col[seq[i]] = (3-(ifin+jfin))+1;
-        }
-    }
-    printvec(col);
-
+    // printvec(chil);
+    // printvec(happ);
+    // printvec(sad);
+    // if(func(0, -1, tree, happ, sad, people)){
+    //     cout<<"YES"<<endl;
+    // }
+    // else{
+    //     cout<<"NO"<<endl;
+    // }
+    cout<<"YES"<<endl;
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t = 1;
-
+    ll t;
+    cin >> t;
     fl(i, t) {
         solve();
     }
