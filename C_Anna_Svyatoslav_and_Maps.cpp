@@ -108,27 +108,139 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-class Base {
-public:
-    virtual void show() { cout << "Base show()\n"; }
-};
+void bfs(int i, vector<vector<int>>& graph, vvll& dist){
+    dist[i][i] = 0;
+    int n = graph.size();
+    queue<ll> q;
+    q.push(i);
+    vector<bool> vis(n, false);
+    vis[i] = true;
+    while(!q.empty()){
+        int u = q.front();
+        q.pop();
+        for(auto it: graph[u]){
+            if(!vis[it]){
+                dist[i][it] = dist[i][u] + 1;
+                vis[it] = true;
+                q.push(it);
+            }
+        }
+    }
+}
+int getind(int st, vvll& dist, vll& path){
 
-class Derived : public Base {
-public:
-    void show() { cout << "Derived show()\n"; }
+    int p = path.size();
+    if(p-1-st==dist[path[st]][path[p-1]]){
+        return p-1;
+    }
+    int left = st+1; //ans>=left
+    int right = p-1; // ans<right
+    while(right-left>1){
+        int mid = left + ((right-left)/2);
+        if(mid-st == dist[path[st]][path[mid]]){
+            left = mid;
+        }
+        else{
+            right = mid;
+        }
+    }
+    return left;
+}
+class Segtree{
+    int size;
+    vll tree;
+    public:
+    Segtree(vll& vec){
+        size = vec.size();
+        int n = size;
+        tree.resize(2*n);
+        copy(vec.begin(), vec.end(), tree.begin()+n);
+        for(int i= n-1; i>=1; i--){
+            tree[i] = min(tree[2*i], tree[(2*i)+1]);
+        }
+    }
+    void update(int i, ll x){
+        i += size;
+        tree[i] = x;
+        while(i>1){
+            i = i/2;
+            tree[i] = min(tree[2*i], tree[(2*i)+1]);
+        }
+    }
+    ll get(int l, int r){
+        l += size;
+        r += size;
+        ll mn = 1e18;
+        while(l<=r){
+            if(l%2==1){
+                mn = min(tree[l], mn);
+                l++;
+            } 
+            if(r%2==0){
+                mn = min(tree[r], mn);
+                r--;
+            }
+            l/=2;
+            r/=2;
+        }
+        return mn;
+    }
 };
-
 void solve() {
+    ll n;
+    cin>>n;
+    vector<string> vec(n);
+    for(int i=0; i<n; i++){
+        cin>>vec[i];
+    }
+    // printvec(vec);
+    vector<vector<int>> graph(n);
+    fl(i,n){
+        fl(j,n){
+            if(vec[i][j] == '1'){
+                graph[i].push_back(j);
+            }
+        }
+    }
+    vvll dist(n, vll(n, 1e9));
+    fl(i,n){
+        bfs(i, graph, dist);
+    }
+    ll p;
+    cin>>p;
+    vll path(p);
+    fl(i,p){
+        cin>>path[i];
+        path[i]--;
+    }
+    vll dp(p,1e18);
+    dp[p-1] = 1;
+    Segtree tr(dp);
+    for(int i=p-2; i>=0; i--){
+        int ind = getind(i, dist, path);
+        // cout<<i<<" "<<ind<<endl;
+        dp[i] = tr.get(i+1, ind)+1;
+        tr.update(i, dp[i]);
+    }
+    ll mx = dp[0];
+    vll res;
+    ll i = 0;
+    while(mx>0){
+        if(dp[i]==mx){
+            res.pb(path[i]+1);
+            mx--;
+        }
+        i++;
+    }
+    cout<<res.size()<<endl;
+    printvec(res);
 
-    Base* ptr = new Derived();
-    ptr->show(); 
-    
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t =  1;
+    ll t = 1;
 
     fl(i, t) {
         solve();

@@ -108,28 +108,120 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-class Base {
-public:
-    virtual void show() { cout << "Base show()\n"; }
+class Segtree{
+    int size;
+    vll tree;
+    public:
+    Segtree(vll& vec){
+        size = vec.size();
+        int n = size;
+        tree.resize(2*n);
+        copy(vec.begin(), vec.end(), tree.begin()+n);
+        for(int i=n-1; i>0; i--){
+            tree[i] = min(tree[2*i], tree[(2*i)+1]);
+        }
+    }
+    ll get(int l , int r){
+        l += size;
+        r += size;
+        ll mn = 1e16;
+        while(l<=r){
+            if(l%2==1){
+                mn = min(tree[l], mn);
+                l++;
+            }
+            if(r%2==0){
+                mn = min(tree[r], mn);
+                r--;
+            }
+            l /= 2;
+            r /= 2;
+        }
+        return mn;
+    }
 };
-
-class Derived : public Base {
-public:
-    void show() { cout << "Derived show()\n"; }
-};
-
 void solve() {
+    ll n;
+    cin>>n;
+    vll vec(n);
+    fl(i,n){
+        cin>>vec[i];
+    }
+    // for(int i=1; i<n; i++){
+    //     if(vec[i]>0 && vec[i-1]>0){
+    //         cout<<"NO"<<endl;
+    //         return;
+    //     }
+    // }
+    stack<pair<ll, ll>> st;
+    vll resright(n,-1);
+    st.push({vec[n-1], n-1});
+    for(int i=n-2; i>=0; i--){
+        while(!st.empty() && st.top().first<=vec[i]){
+            st.pop();
+        }
+        if(!st.empty()){
+            resright[i] = st.top().second;
+        }
+        st.push({vec[i],i});
+    }
+    // printvec(resright);
 
-    Base* ptr = new Derived();
-    ptr->show(); 
-    
+    stack<pair<ll, ll>> st2;
+    vll resleft(n, -1);
+    st2.push({vec[0], 0});
+    for(int i=1; i<n; i++){
+        while(!st2.empty() && st2.top().first<=vec[i]){
+            st2.pop();
+        }
+        if(!st2.empty()){
+            resleft[i] = st2.top().second;
+        }
+        st2.push({vec[i],i});
+    }
+
+    vll pref(n+1, 0);
+    vll suff(n+1 , 0);
+    for(int i=1; i<=n; i++){
+        pref[i] = pref[i-1]+vec[i-1];
+    } 
+    for(int i=n-1; i>=0; i--){
+        suff[i] = suff[i+1]+vec[i];
+    }
+    Segtree tr1(pref);
+    Segtree tr2(suff);
+    for(int i=0; i<n; i++){
+        if(vec[i]>0){
+            int left = resleft[i]+1;
+            int right = resright[i];
+            if(right == -1){
+                right = n-1;
+            }
+            else{
+                right = right -1;
+            }
+            ll mxsumleft = pref[i+1]-tr1.get(left, i);
+            ll mxsumright = suff[i]- tr2.get(i+1, right+1);
+            ll mxsum = mxsumright+mxsumleft-vec[i];
+            // cout<<i<<" "<<mxsum<<endl;
+            if(vec[i]<mxsum){
+                cout<<"NO"<<endl;
+                // cout<<i<<endl;
+                // cout<<mxsumleft<<endl;
+                // cout<<mxsumright<<endl;
+                return;
+            }
+        }
+    }
+    cout<<"YES"<<endl;
+    return;
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t =  1;
-
+    ll t;
+    cin >> t;
     fl(i, t) {
         solve();
     }

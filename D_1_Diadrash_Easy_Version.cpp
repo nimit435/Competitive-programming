@@ -108,28 +108,74 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-class Base {
-public:
-    virtual void show() { cout << "Base show()\n"; }
-};
-
-class Derived : public Base {
-public:
-    void show() { cout << "Derived show()\n"; }
-};
-
+int ask(int l, int r){
+    cout<<"? "<<l<<" "<<r<<endl;
+    int resp;
+    cin>>resp;
+    return resp;
+}
 void solve() {
+    ll n;
+    cin>>n;
+    ll q;
+    cin>>q;
+    vpll ranges(q);
+    fl(i,q){
+        cin>>ranges[i].ff>>ranges[i].ss;
+    }
+    auto cmp = [&](auto a, auto b){
+        if(a.ff!=b.ff){
+            return a.ff<b.ff;
+        }
+        else{
+            return a.ss>b.ss;
+        }
+    };
+    sort(ranges.begin(), ranges.end(),cmp);
+    int l = ranges[0].ff;
+    int r = ranges[0].ss;
+    vpll finrang;
+    finrang.pb(ranges[0]);
+    int i=1;
+    while(i<q){
+        if(ranges[i].ff>l && ranges[i].ss>r){
+            l = ranges[i].ff;
+            r = ranges[i].ss;
+            finrang.pb(ranges[i]);
+        }
+        i++;
+     }
+    // printvec(finrang);
+    int a = ask(1, n/2);
+    vpll fin;
 
-    Base* ptr = new Derived();
-    ptr->show(); 
-    
+    if(a>0){
+        for(auto r: finrang){
+            if(r.ff<=n/2){
+                fin.pb(r);
+            }
+        }
+    }
+    else{
+        for(auto r:finrang){
+            if(r.ss>(n/2)){
+                fin.pb(r);
+            }
+        }
+    }
+    int mx = 0;
+    for(auto r: fin){
+        mx = max(mx, ask(r.ff, r.ss));
+    }
+    cout<<"! "<<mx<<endl;
+
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t =  1;
-
+    ll t;
+    cin >> t;
     fl(i, t) {
         solve();
     }

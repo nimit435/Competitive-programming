@@ -108,28 +108,90 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-class Base {
-public:
-    virtual void show() { cout << "Base show()\n"; }
-};
-
-class Derived : public Base {
-public:
-    void show() { cout << "Derived show()\n"; }
-};
-
 void solve() {
+    ll n;
+    cin>>n;
+    vvll vec(n, vll(n));
+    fl(i,n){
+        fl(j,n){
+            cin>>vec[i][j];
+        }
+    }
+    vll a(n);
+    vll b(n);
+    fl(i,n){
+        cin>>a[i];
+    }
+    fl(i,n){
+        cin>>b[i];
+    }
+    vvll dp(n, vll(2,1e18));
+    dp[0][0] = 0;
+    dp[0][1] = a[0];
+    for(int i = 1; i<n; i++){
+        for(int y = 0; y<2; y++){
+            for(int x=0; x<2; x++){
+                bool fl = true;
+                for(int j = 0; j<n; j++){
+                    if(vec[i][j]+x==vec[i-1][j]+y){
+                        fl = false;
+                    }
+                    
+                }
+                if(fl){
+                    if(x==0){
+                        dp[i][0] = min(dp[i][0], dp[i-1][y]);
+                    }
+                    else{
+                        dp[i][1] = min(dp[i][1], dp[i-1][y]+a[i]); 
+                    }
+                }
+            }
+        }
+    }
+    ll res1 = min(dp[n-1][0],dp[n-1][1]);
+    if(res1 == 1e18){
+        cout<<-1<<endl;
+        return;
+    }
+    vvll dp1(n, vll(2,1e18));
 
-    Base* ptr = new Derived();
-    ptr->show(); 
-    
+    dp1[0][0] = 0;
+    dp1[0][1] = b[0];
+    for(int i = 1; i<n; i++){
+        for(int y = 0; y<2; y++){
+            for(int x=0; x<2; x++){
+                bool fl = true;
+                for(int j = 0; j<n; j++){
+                    if(vec[j][i]+x==vec[j][i-1]+y){
+                        fl = false;
+                    }
+                    
+                }
+                if(fl){
+                    if(x==0){
+                        dp1[i][0] = min(dp1[i][0], dp1[i-1][y]);
+                    }
+                    else{
+                        dp1[i][1] = min(dp1[i][1], dp1[i-1][y]+b[i]); 
+                    }
+                }
+            }
+        }
+    }
+    ll res2 = min(dp1[n-1][0],dp1[n-1][1]);
+    if(res2 == 1e18){
+        cout<<-1<<endl;
+        return;
+    }
+    cout<<res1+res2<<endl;
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t =  1;
-
+    ll t;
+    cin >> t;
     fl(i, t) {
         solve();
     }

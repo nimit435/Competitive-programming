@@ -108,28 +108,183 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-class Base {
-public:
-    virtual void show() { cout << "Base show()\n"; }
-};
-
-class Derived : public Base {
-public:
-    void show() { cout << "Derived show()\n"; }
-};
-
+// class Segtree{
+//     int size;
+//     vector<ll> tree;
+//     public:
+//     Segtree(vll& vec){
+//         size = vec.size();
+//         int n = size;
+//         tree.resize(2*n);
+//         copy(vec.begin(),vec.end(), tree.begin() + size);
+//         for(int i=size-1; i>0; i--){
+//             tree[i] = min(tree[2*i], tree[(2*i) +1]);
+//         }
+//     }
+//     ll get(ll l , ll r){
+//         l += size;
+//         r += size;
+//         ll mx = 1e18;
+//         while(l<=r){
+//             if(l%2==1){
+//                 mx = min(mx, tree[l]);
+//                 l++;
+//             }
+//             if(r%2==0){
+//                 mx = min(mx, tree[r]);
+//                 r--;
+//             }
+//             l /= 2;
+//             r /= 2;
+//         }
+//         return mx;
+//     }
+// };
+// ll getind(ll x, ll r, map<ll, vll>& ind){
+//     int n = ind[x].size();
+//     if(n==1){
+//         return ind[x][0];
+//     }
+//     int left = 0; // ind[x][left] <= r
+//     int right = n-1; // ind[x][left]>r
+//     if(ind[x][right]<=r){
+//         return ind[x][right];
+//     }
+//     while(right - left >1){
+//         int mid = (left )+ ((right-left)/2);
+//         if(ind[x][mid]<=r){
+//             left = mid;
+//         }
+//         else{
+//             right = mid;
+//         }
+//     }
+//     return ind[x][left];
+// }
 void solve() {
+    ll n;
+    cin>>n;
+    ll q;
+    cin>>q;
+    vll vec(n);
+    fl(i,n){
+        cin>>vec[i];
+    }
+    vll pref(n+1,0);
+    vll xr(n+1, 0);
+    for(int i=1; i<=n; i++){
+        pref[i]= pref[i-1]+vec[i-1];
+        xr[i] = xr[i-1]^vec[i-1];
+    }
+    // printvec(pref);
+    // printvec(xr);
 
-    Base* ptr = new Derived();
-    ptr->show(); 
-    
+    vll helper(n+1);
+    map<ll, vll> ind;
+    for(int i=0;i<=n; i++){
+        helper[i] = pref[i]-xr[i];
+        ind[helper[i]].push_back(i);
+    }
+    ll L, R;
+    cin>>L>>R;
+    // Segtree tr(helper);
+    int lfin = L;
+    int rfin = L;
+    ll best = 0;
+    // printvec(helper);
+    // for(auto it: ind){
+    //     cout<<it.ff<<": "<<endl;
+    //     printvec(it.second);
+    // }
+    // for(int r = R; r>=L; r--){
+    //     ll val = tr.get(L-1, r-1);
+    //     cout<<r<<" "<<val<<endl;
+    //     if(helper[r]- val > best){
+    //         ll i = getind(val, r-1, ind);
+    //         cout<<": "<<r<<" "<<i<<endl;
+    //         rfin = r;
+    //         lfin = i+1;
+    //         best = helper[r] - val;
+    //         // cout<<r<<" :::"<<endl;
+    //     }
+    //     else if(helper[r]- val == best){
+    //         ll i = getind(val, r-1, ind);
+    //         if(r-(i+1)+1<= (rfin - lfin +1)){
+    //             rfin = r;
+    //             lfin = i+1;
+    //         }
+    //         // cout<<i<<" "<<r<<" :::"<<endl;
+    //     }
+    //     cout<<"::"<< rfin<<" "<<lfin<<endl;
+    // }
+    // cout<<lfin<<" "<<rfin<<endl;
+    for(int i=L; i<=R; i++){
+        ll mx = (pref[R] - pref[i-1]) - (xr[R]^xr[i-1]);
+        // if(i==1){
+        //     ll a = pref[R] - pref[i-1];
+        //     ll b = (xr[R]^xr[i-1]);
+        //     cout<<a-b<<endl;
+        //     cout<<pref[R] - pref[i-1]<<endl;
+        //     cout<<(xr[R]^xr[i-1])<<endl;
+
+        //     cout<<mx<<"::"<<R<<endl;
+        // }
+        if(mx>best){
+            int left = i; // f(i, left) < mx;
+            int right = R; // f(i, right) = mx
+            if(pref[left]-pref[i-1] - (xr[left]^xr[i-1])==mx){
+                lfin = i;
+                rfin = i;
+                continue;
+            }
+            while(right-left>1){
+                int mid = left + ((right-left)/2);
+                if(pref[mid] - pref[i-1] - (xr[mid]^xr[i-1])!=mx){
+                    left = mid;
+                }
+                else{
+                    right = mid;
+                }
+            }
+            lfin = i;
+            rfin = right;
+            best = mx;
+
+        }
+        else if(mx==best){
+            int left = i; // f(i, left) < mx;
+            int right = R; // f(i, right) = mx
+            if(pref[left]-pref[i-1] - (xr[left]^xr[i-1])==mx){
+                lfin = i;
+                rfin = i;
+                continue;
+            }
+            while(right-left>1){
+                int mid = left + ((right-left)/2);
+                if(pref[mid] - pref[i-1] - (xr[mid]^xr[i-1])!=mx){
+                    left = mid;
+                }
+                else{
+                    right = mid;
+                }
+            }
+            if(right-i+1<rfin-lfin+1){
+                rfin = right;
+                lfin = i;
+            }
+        }
+    }
+    cout<<lfin<<" "<<rfin<<endl;
+    // cout<<pref[rfin]-pref[lfin-1] - (xr[rfin]^xr[lfin-1])<<endl;
+    // cout<<pref[12]-pref[1-1] - (xr[12]^xr[1-1])<<endl;
+
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t =  1;
-
+    ll t;
+    cin >> t;
     fl(i, t) {
         solve();
     }

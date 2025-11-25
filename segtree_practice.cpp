@@ -108,30 +108,45 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-class Base {
-public:
-    virtual void show() { cout << "Base show()\n"; }
-};
-
-class Derived : public Base {
-public:
-    void show() { cout << "Derived show()\n"; }
-};
-
-void solve() {
-
-    Base* ptr = new Derived();
-    ptr->show(); 
-    
-}
-// Allah hu Akbar
-// 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
-int main() {
-    Code By Solve
-    ll t =  1;
-
-    fl(i, t) {
-        solve();
+class Segtree{
+    private:
+    vector<ll> tree;
+    int size;
+    public:
+    Segtree(vll& vec){
+        size = vec.size();
+        tree.resize(2*size);
+        copy(vec.begin(), vec.end(), tree.begin() + size);
+        int n = size;
+        for(int i = n-1; i>=1; i--){
+            tree[i] = tree[2*i] + tree[(2*i)+1];
+        }
     }
-    return 0;
-}
+    ll get(ll l , ll r){
+        l = l + size;
+        r = r + size;
+        ll sum = 0;
+        while(l<=r){
+            if(l%2 == 1){
+                sum += tree[l];
+                l++;
+            }
+            if(r%2 == 0){
+                sum += tree[r];
+                r--;
+            }
+            l /=2;
+            r /=2;
+        }
+        return sum;
+    }
+    void update(ll i, ll x){
+        i = i+ size;
+        tree[i] = x;
+        while(i>1){
+            i/=2;
+            tree[i] = tree[2*i] + tree[2*i + 1];
+        }
+        
+    }
+};

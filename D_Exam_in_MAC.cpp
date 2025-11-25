@@ -108,28 +108,41 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-class Base {
-public:
-    virtual void show() { cout << "Base show()\n"; }
-};
-
-class Derived : public Base {
-public:
-    void show() { cout << "Derived show()\n"; }
-};
-
 void solve() {
+    ll n;
+    cin>>n;
+    ll c;
+    cin>>c;
+    vll vec(n);
+    fl(i,n){
+        cin>>vec[i];
+    }
+    ll tot = ((c+1)*(c+2))/2;
+    ll a = 0;
+    ll b = 0;
+    ll c1 = 0;
+    ll eve = 0;
+    ll odd = 0;
+    fl(i,n){
+        a += (vec[i]/2)+1;
+        b += c-vec[i]+1;
+        if(vec[i]%2==0){
+            eve ++;
+        }
+        else{
+            odd++;
+        }
+    }
+    c1 += ((eve*(eve+1))/2 )+ ((odd*(odd+1))/2);
+    cout<<tot-a-b+c1<<endl;
 
-    Base* ptr = new Derived();
-    ptr->show(); 
-    
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t =  1;
-
+    ll t;
+    cin >> t;
     fl(i, t) {
         solve();
     }

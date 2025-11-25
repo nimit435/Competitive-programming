@@ -108,27 +108,73 @@ ll mergeSort(vector<ll> &arr, ll low, ll high) {int cnt = 0;if (low >= high) ret
 ll numberOfInversions(vector<ll>&a, ll n) {return mergeSort(a, 0, n - 1);}
 
 //Code
-class Base {
-public:
-    virtual void show() { cout << "Base show()\n"; }
-};
-
-class Derived : public Base {
-public:
-    void show() { cout << "Derived show()\n"; }
-};
-
 void solve() {
+    ll n;
+    cin>>n;
+    vvll tree(n);
+    fl(i,n-1){
+        ll u,v;
+        cin>>u>>v;
+        u--; v--;
+        tree[u].pb(v);
+        tree[v].pb(u);
+    }
+    vll bf(n);
+    vll ind(n,-1);
+    fl(i,n){
+        cin>>bf[i];
+        bf[i]--;
+        ind[bf[i]] = i;
+    }
 
-    Base* ptr = new Derived();
-    ptr->show(); 
+    auto cmp = [&](auto a, auto b){
+        if(ind[a]<ind[b]){
+            return true;
+        }
+        return false;
+    };
+    fl(i,n){
+        sort(tree[i].begin(), tree[i].end(), cmp);
+    }
+
+
+    vector<bool> vis(n,false);
+    vis[0] = true;
+    vector<ll> fin;
+    queue<ll> q;
+    fin.pb(0);
+    q.push(0);
+    while(!q.empty()){
+        ll u = q.front();
+        q.pop();
+        for(auto it: tree[u]){
+            if(!vis[it]){
+
+                vis[it] = true;
+                q.push(it);
+                fin.pb(it);
+            }
+        }
+    }
+    // printvec(fin);
     
+    // printvec(bf);
+
+    fl(i,n){
+        if(bf[i]!=fin[i]){
+            cout<<"No"<<endl;
+            return;
+        }
+
+    }
+    cout<<"Yes"<<endl;
+    return;
 }
 // Allah hu Akbar
 // 1110011 1110100 1100001 1101100 1101011 1100101 1110010 100000 1110100 1100101 1110010 1101001 100000 1101101 1100001 1100001 100000 1101011 1101001
 int main() {
     Code By Solve
-    ll t =  1;
+    ll t =1;
 
     fl(i, t) {
         solve();
